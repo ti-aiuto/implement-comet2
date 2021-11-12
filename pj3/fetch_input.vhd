@@ -4,9 +4,9 @@ use IEEE.std_logic_unsigned.all;
 
 entity fetch_input is
 	port(
-		CLT_FT : in std_logic; 
+		CLK_FT : in std_logic; 
 		P_COUNT : in std_logic_vector(15 downto 0);
-		PROM_OUT : out std_logic_vector(15 downto 0)
+		PROM_OUT : out std_logic_vector(7 downto 0)
 	);
 end fetch_input;
 
@@ -18,7 +18,7 @@ type MEMORY is array (0 to 7) of WORD;
 
 constant MEM : MEMORY := 
 	(
-		"00000000", 
+		"00000001", 
 		"00000010", 
 		"00000100", 
 		"00001000", 
@@ -29,9 +29,9 @@ constant MEM : MEMORY :=
 	);
 
 begin 
-	process(CLT_FT)
+	process(CLK_FT)
 	begin
-		if (CLT_FT'event and CLT_FT = '1') then
+		if (CLK_FT'event and CLK_FT = '1') then
 			PROM_OUT <= MEM(conv_integer(P_COUNT(3 downto 0)));
 		end if;
 	end process;
