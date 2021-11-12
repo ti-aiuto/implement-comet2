@@ -14,6 +14,13 @@ end pj3;
 
 architecture RTL of pj3 is
 
+component clock_down
+	port(
+		CLK_IN : in std_logic;
+		CLK_OUT : out std_logic
+	);
+end component;
+
 component clock_down_dynamyc_7seg
 	port(
 		CLK_IN : in std_logic;
@@ -29,18 +36,33 @@ component bin_16_dec_dynamic_6
 	);
 end component;
 
+component register_16 is
+	port(
+		CLK_IN : in std_logic;
+		DATA_IN : in std_logic_vector(15 downto 0);
+		DATA_OUT : out std_logic_vector(15 downto 0)
+	);
+end component;
+
+signal CLK_SLOW_7SEG : std_logic;
 signal CLK_SLOW : std_logic;
+signal REGISTER_A_OUT : std_logic_vector(15 downto 0);
+signal REGISTER_B_OUT : std_logic_vector(15 downto 0);
 
 begin
-	CLOCK_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW);
+	CLOCK_7SEG_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW_7SEG);
+	CLOCK_COMPONENT: clock_down port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW);
 	
-	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW,
-	BIN_IN => "0010011010010100", 
+	REGISTER_A : register_16 port map(CLK_IN => CLK_SLOW, DATA_IN => "0010011010010100", DATA_OUT => REGISTER_A_OUT);
+	REGISTER_B : register_16 port map(CLK_IN => CLK_SLOW, DATA_IN => "1101010000110001", DATA_OUT => REGISTER_B_OUT);
+	
+	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
+	BIN_IN => REGISTER_A_OUT, 
 	SEG7 => SEG7A, 
 	DIGIT_SELECT => DIGITA_SELECT);
 
-		DEC2: bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW,
-	BIN_IN => "1101010000110001", 
+	DEC2: bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
+	BIN_IN => REGISTER_B_OUT, 
 	SEG7 => SEG7B, 
 	DIGIT_SELECT => DIGITB_SELECT);
 end RTL;
