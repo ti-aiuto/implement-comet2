@@ -77,6 +77,7 @@ set_location_assignment PIN_99 -to SEG7B[0]
 set_location_assignment PIN_69 -to DIGITB_SELECT[2]
 set_location_assignment PIN_67 -to DIGITB_SELECT[1]
 set_location_assignment PIN_65 -to DIGITB_SELECT[0]
+set_global_assignment -name VHDL_FILE t_ff.vhd
 set_global_assignment -name VHDL_FILE register_16.vhd
 set_global_assignment -name VHDL_FILE clock_down_dynamyc_7seg.vhd
 set_global_assignment -name VHDL_FILE pj3.vhd
@@ -91,4 +92,6 @@ set_global_assignment -name VHDL_FILE bin_dec10.vhd
 set_global_assignment -name VHDL_FILE bin_16_dec_dynamic_6.vhd
 set_global_assignment -name VHDL_FILE sync_jk_ff.vhd
 set_global_assignment -name VHDL_FILE d_ff.vhd
+set_global_assignment -name VHDL_FILE fetch_input.vhd
+set_global_assignment -name VHDL_FILE async_counter_4bit.vhd
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
