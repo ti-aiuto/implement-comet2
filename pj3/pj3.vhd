@@ -44,10 +44,10 @@ component register_16 is
 	);
 end component;
 
-component async_counter_3bit
+component async_counter_4bit
 	port(
 		CLK : in std_logic;
-		COUNT : out std_logic_vector(2 downto 0)
+		COUNT : out std_logic_vector(3 downto 0)
 	);
 end component;
 
@@ -63,19 +63,19 @@ signal CLK_SLOW_7SEG : std_logic;
 signal CLK_SLOW : std_logic;
 signal REGISTER_A_OUT : std_logic_vector(15 downto 0);
 signal REGISTER_B_OUT : std_logic_vector(15 downto 0);
-signal NUM1 : std_logic_vector(2 downto 0);
+signal NUM1 : std_logic_vector(3 downto 0);
 signal PROM_OUT : std_logic_vector(7 downto 0);
 
 begin
 	CLOCK_7SEG_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW_7SEG);
 	CLOCK_COMPONENT: clock_down port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW);
 	
-	COUNTER_COMPONENT : async_counter_3bit port map(CLK => CLK_SLOW, COUNT => NUM1);
+	COUNTER_COMPONENT : async_counter_4bit port map(CLK => CLK_SLOW, COUNT => NUM1);
 	
 	REGISTER_A : register_16 port map(CLK_IN => CLK_SLOW, DATA_IN => "00000000" & PROM_OUT, DATA_OUT => REGISTER_A_OUT);
-	REGISTER_B : register_16 port map(CLK_IN => CLK_SLOW, DATA_IN => "0000000000000" & NUM1, DATA_OUT => REGISTER_B_OUT);
+	REGISTER_B : register_16 port map(CLK_IN => CLK_SLOW, DATA_IN => "000000000000" & NUM1, DATA_OUT => REGISTER_B_OUT);
 	
-	MEMORY : fetch_input port map(CLK_FT => CLK_SLOW, P_COUNT => "0000000000000" & NUM1, PROM_OUT => PROM_OUT);
+	MEMORY : fetch_input port map(CLK_FT => CLK_SLOW, P_COUNT => "000000000000" & NUM1, PROM_OUT => PROM_OUT);
 	
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
 	BIN_IN => REGISTER_A_OUT, 

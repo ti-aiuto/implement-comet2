@@ -14,7 +14,7 @@ architecture RTL of fetch_input is
 
 subtype WORD is std_logic_vector(0 to 7);
 
-type MEMORY is array (0 to 7) of WORD;
+type MEMORY is array (0 to 15) of WORD;
 
 constant MEM : MEMORY := 
 	(
@@ -25,7 +25,15 @@ constant MEM : MEMORY :=
 		"00010000", 
 		"00100000", 
 		"01000000", 
-		"10000000"
+		"10000000",
+		"00000001", 
+		"00000011", 
+		"00000101", 
+		"00001001", 
+		"00010001", 
+		"00100001", 
+		"01000001", 
+		"10000001"
 	);
 
 begin 
