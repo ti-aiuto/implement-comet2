@@ -4,6 +4,7 @@ use IEEE.std_logic_1164.all;
 entity pj3 is
 	port 
 	(
+		RESET_IN : in std_logic;
 		CLK_IN : in std_logic;
 		SEG7A : out std_logic_vector(6 downto 0);
 		DIGITA_SELECT : out std_logic_vector(5 downto 0);
@@ -96,7 +97,7 @@ signal REGISTER_B_OUT : std_logic_vector(15 downto 0);
 signal PROM_OUT : std_logic_vector(15 downto 0);
 
 signal RAM_WRITE_FLAG : std_logic;
-signal NEXT_RAM_DATA : std_logic_vector(15 downto 0);
+signal NEXT_PR_IN : std_logic_vector(15 downto 0);
 signal PR_OUT : std_logic_vector(15 downto 0);
 signal PR_OUT_PLUS1 : std_logic_vector(16 downto 0);
 signal PROM_ADDR_IN : std_logic_vector(15 downto 0);
@@ -119,10 +120,13 @@ begin
 	DATA_IN_1 => PR_OUT, 
 	DATA_IN_2 => PR_OUT_PLUS1(15 downto 0), 
 	DATA_OUT => PROM_ADDR_IN );
-		
+	
+	NEXT_PR_IN <= "0000000000000000";
+	RAM_WRITE_FLAG <= RESET_IN;
+	
 	REGISTER_A : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PROM_OUT, DATA_OUT => REGISTER_A_OUT);
 	REGISTER_B : register_16 port map(CLK_IN => CLK_FT2, DATA_IN => PROM_OUT, DATA_OUT => REGISTER_B_OUT);
-	PR : register_16 port map(CLK_IN => CLK_SLOW and RAM_WRITE_FLAG, DATA_IN => NEXT_RAM_DATA, DATA_OUT => PR_OUT);
+	PR : register_16 port map(CLK_IN => CLK_WB and RAM_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
 	
 	MEMORY : prom port map(P_COUNT => PROM_ADDR_IN, PROM_OUT => PROM_OUT);
 	
