@@ -56,13 +56,6 @@ component register_16 is
 	);
 end component;
 
-component async_counter_4bit
-	port(
-		CLK : in std_logic;
-		COUNT : out std_logic_vector(3 downto 0)
-	);
-end component;
-
 component fetch_input is
 	port(
 		CLK_FT : in std_logic; 
@@ -83,14 +76,18 @@ signal CLK_WB : std_logic;
 
 signal REGISTER_A_OUT : std_logic_vector(15 downto 0);
 signal REGISTER_B_OUT : std_logic_vector(15 downto 0);
-signal NUM1 : std_logic_vector(3 downto 0);
 signal PROM_OUT : std_logic_vector(15 downto 0);
+
+signal RAM_WRITE_FLAG : std_logic;
+signal NEXT_RAM_DATA : std_logic_vector(15 downto 0);
+signal PR_OUT : std_logic_vector(15 downto 0);
+
 
 begin
 	CLOCK_7SEG_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW_7SEG);
 	CLOCK_COMPONENT: clock_down port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW);
 	CLOCK_GEN_COMPONENT: clk_gen port map(
-	CLK => CLK_IN,
+	CLK => CLK_SLOW,
 	CLK_FT1 => CLK_FT1, 
 	CLK_FT2 => CLK_FT2, 
 	CLK_DC => CLK_DC, 
@@ -100,10 +97,11 @@ begin
 	
 	COUNTER_COMPONENT : async_counter_4bit port map(CLK => CLK_SLOW, COUNT => NUM1);
 	
-	REGISTER_A : register_16 port map(CLK_IN => CLK_SLOW, DATA_IN => PROM_OUT, DATA_OUT => REGISTER_A_OUT);
-	REGISTER_B : register_16 port map(CLK_IN => CLK_SLOW, DATA_IN => "000000000000" & NUM1, DATA_OUT => REGISTER_B_OUT);
+	REGISTER_A : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PROM_OUT, DATA_OUT => REGISTER_A_OUT);
+	REGISTER_B : register_16 port map(CLK_IN => CLK_FT2, DATA_IN => PROM_OUT, DATA_OUT => REGISTER_B_OUT);
+	PR : register_16 port map(CLK_IN => CLK_SLOW and RAM_WRITE_FLAG, DATA_IN => NEXT_RAM_DATA, DATA_OUT => PR_OUT);
 	
-	MEMORY : fetch_input port map(CLK_FT => CLK_SLOW, P_COUNT => "000000000000" & NUM1, PROM_OUT => PROM_OUT);
+	MEMORY : fetch_input port map(CLK_FT => CLK_FT1 or CLK_FT2, P_COUNT => PR_OUT, PROM_OUT => PROM_OUT);
 	
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
 	BIN_IN => REGISTER_A_OUT, 
@@ -111,7 +109,7 @@ begin
 	DIGIT_SELECT => DIGITA_SELECT);
 
 	DEC2: bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => "000000000000" & NUM1, 
+	BIN_IN => REGISTER_B_OUT, 
 	SEG7 => SEG7B, 
 	DIGIT_SELECT => DIGITB_SELECT);
 end RTL;
