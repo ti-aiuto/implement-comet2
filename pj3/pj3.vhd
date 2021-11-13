@@ -75,6 +75,13 @@ component adder_16bit is
 	);
 end component;
 
+component not_16bit is
+	port( 
+	DATA_IN : in std_logic_vector(15 downto 0); 
+	DATA_OUT : out std_logic_vector(15 downto 0)
+	);
+end component;
+
 component multiplexer_16bit_2ways is
 	port(
 		SELECTOR : in std_logic;
@@ -171,7 +178,14 @@ signal USE_RAM_AS_GRB_FLAG : std_logic;
 signal GRB_OR_RAM : std_logic_vector(15 downto 0);
 signal ALU_DATA_IN_B: std_logic_vector(15 downto 0);
 
+signal SET_ALU_ADDER_CI_FLAG : std_logic;
+signal DATA_B_NEGATED : std_logic_vector(15 downto 0);
+signal USE_NEGATED_DATAB_FLAG: std_logic;
+
+signal DATA_B_OR_NEGATED_DATA_B : std_logic_vector(15 downto 0);
+
 signal OP_IS_LAD_FLAG : std_logic;
+signal OP_IS_SUB1_FLAG : std_logic;
 
 begin
 	CLOCK_7SEG_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW_7SEG);
@@ -272,9 +286,10 @@ begin
 
 	-- ここにどの命令か判定するフラグを作っていく
 	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
-
-	USE_RAM_ADDR_AS_DATA_FLAG <= OP_IS_LAD_FLAG;
+	OP_IS_SUB1_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and not SUB_OP(1) and SUB_OP(0));
 	
+	USE_RAM_ADDR_AS_DATA_FLAG <= OP_IS_LAD_FLAG;
+
 	RAM_MX : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_ADDR_AS_DATA_FLAG, 
 	DATA_IN_1 => "0000000000000000", -- ここにRAMからの値を入れる
 	DATA_IN_2 => OP2_PLUS_GRB_REG_OUT,
@@ -300,9 +315,20 @@ begin
 	ALU_DATA_IN_A <= GRA_OR_ZERO;
 	ALU_DATA_IN_B <= GRB_OR_RAM;
 	
-	ALU_ADDER : adder_16bit port map( CI => '0', 
+	-- 引き算
+	USE_NEGATED_DATAB_FLAG <= OP_IS_SUB1_FLAG;
+	SET_ALU_ADDER_CI_FLAG <= OP_IS_SUB1_FLAG;
+	
+	NOT_NEGATE_DATAB : not_16bit port map(DATA_IN => ALU_DATA_IN_B, DATA_OUT => DATA_B_NEGATED);
+	
+	MX_NEGATE_DATAB : multiplexer_16bit_2ways port map( SELECTOR => USE_NEGATED_DATAB_FLAG, 
+	DATA_IN_1 => ALU_DATA_IN_B, 
+	DATA_IN_2 => DATA_B_NEGATED, 
+	DATA_OUT => DATA_B_OR_NEGATED_DATA_B);
+	
+	ALU_ADDER : adder_16bit port map( CI => SET_ALU_ADDER_CI_FLAG, 
 	AIN => ALU_DATA_IN_A, 
-	BIN => ALU_DATA_IN_B, 
+	BIN => DATA_B_OR_NEGATED_DATA_B, 
 	SUM(15 downto 0) => ALU_DATA); -- TODO: ここでOFとかのセット必要
 	
 	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK_EX, DATA_IN => ALU_DATA, DATA_OUT => ALU_DATA_REG_OUT);
