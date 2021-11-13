@@ -122,6 +122,8 @@ signal PR_OUT_REG_OUT : std_logic_vector(15 downto 0);
 signal PR_OUT_PLUS1 : std_logic_vector(15 downto 0);
 signal PROM_ADDR_IN : std_logic_vector(15 downto 0);
 
+signal GR_WRITE_FLAG : std_logic;
+
 signal GR0_OUT : std_logic_vector(15 downto 0);
 signal GR1_OUT : std_logic_vector(15 downto 0);
 signal GR2_OUT : std_logic_vector(15 downto 0);
@@ -180,20 +182,23 @@ begin
 	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, DATA_IN => PROM_OUT, DATA_OUT => OP2_OUT);
 	PR : register_16 port map(CLK_IN => CLK_WB and PR_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
 	
-	GR0 : register_16 port map(CLK_IN => CLK_WB, DATA_IN => "0000000000000000", DATA_OUT => GR0_OUT);
-	GR1 : register_16 port map(CLK_IN => CLK_WB, DATA_IN => "0000000000001111", DATA_OUT => GR1_OUT);
-	GR2 : register_16 port map(CLK_IN => CLK_WB, DATA_IN => "0000000000011111", DATA_OUT => GR2_OUT);
-	GR3 : register_16 port map(CLK_IN => CLK_WB, DATA_IN => "0000000000000000", DATA_OUT => GR3_OUT);
-	GR4 : register_16 port map(CLK_IN => CLK_WB, DATA_IN => "0000000000000000", DATA_OUT => GR4_OUT);
-	GR5 : register_16 port map(CLK_IN => CLK_WB, DATA_IN => "0000000000000000", DATA_OUT => GR5_OUT);
-	GR6 : register_16 port map(CLK_IN => CLK_WB, DATA_IN => "0000000000000000", DATA_OUT => GR6_OUT);
-	GR7 : register_16 port map(CLK_IN => CLK_WB, DATA_IN => "0000000000000000", DATA_OUT => GR7_OUT);
-
+	GR0 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR0_OUT);
+	GR1 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000001111", DATA_OUT => GR1_OUT);
+	GR2 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000011111", DATA_OUT => GR2_OUT);
+	GR3 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR3_OUT);
+	GR4 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR4_OUT);
+	GR5 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR5_OUT);
+	GR6 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR6_OUT);
+	GR7 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR7_OUT);
+	
 	GRA_SELECT <= OP1_OUT(6 downto 4);
 	GRB_SELECT <= OP1_OUT(2 downto 0);
 	
 	GRA_REGISTER : register_16 port map(CLK_IN => CLK_DC, DATA_IN => GRA_OUT, DATA_OUT => GRA_OUT_REG_OUT);
 	GRB_REGISTER : register_16 port map(CLK_IN => CLK_DC, DATA_IN => GRB_OUT, DATA_OUT => GRB_OUT_REG_OUT);
+
+	OP2_PLUS_GRB_ADDER : adder_16bit port map( CI => '0', AIN => OP2_OUT, BIN => GRB_OUT, SUM(15 downto 0) => OP2_PLUS_GRB );
+	OP2_PLUS_GRB_REGISTER : register_16 port map(CLK_IN => CLK_DC, DATA_IN => OP2_PLUS_GRB, DATA_OUT => OP2_PLUS_GRB_REG_OUT);
 	
 	MX_GRA: multiplexer_16bit_8ways port map(
 		SELECTOR => GRA_SELECT, 
@@ -221,15 +226,15 @@ begin
 		DATA_OUT => GRB_OUT
 	);
 	
-	MEMORY : prom port map(P_COUNT => PROM_ADDR_IN, PROM_OUT => PROM_OUT);
+	ROM : prom port map(P_COUNT => PROM_ADDR_IN, PROM_OUT => PROM_OUT);
 	
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => GRA_OUT, 
+	BIN_IN => OP1_OUT, 
 	SEG7 => SEG7A, 
 	DIGIT_SELECT => DIGITA_SELECT);
 
 	DEC2: bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => GRB_OUT, 
+	BIN_IN => OP2_PLUS_GRB_REG_OUT, 
 	SEG7 => SEG7B, 
 	DIGIT_SELECT => DIGITB_SELECT);
 end RTL;
