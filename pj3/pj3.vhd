@@ -84,15 +84,6 @@ component multiplexer_16bit_2ways is
 	);
 end component;
 
-component sync_jk_ff is
-	port(
-		CLK : in std_logic;
-		J : in std_logic;
-		K : in std_logic;
-		Q : out std_logic
-	);
-end component;
-
 signal CLK_SLOW_7SEG : std_logic;
 signal CLK_SLOW : std_logic;
 
