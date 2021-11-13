@@ -34,6 +34,7 @@ component clk_gen
 	port(
 		CLK : in std_logic;
 		CLK_FT1 : out std_logic;
+		CLK_FT2LOAD: out std_logic;
 		CLK_FT2 : out std_logic;
 		CLK_DC : out std_logic;
 		CLK_MA : out std_logic;
@@ -96,6 +97,7 @@ signal CLK_SLOW_7SEG : std_logic;
 signal CLK_SLOW : std_logic;
 
 signal CLK_FT1 : std_logic;
+signal CLK_FT2LOAD : std_logic;
 signal CLK_FT2 : std_logic;
 signal CLK_DC : std_logic;
 signal CLK_MA : std_logic;
@@ -106,7 +108,6 @@ signal OP1_OUT : std_logic_vector(15 downto 0);
 signal OP2_OUT : std_logic_vector(15 downto 0);
 signal PROM_OUT : std_logic_vector(15 downto 0);
 
-signal FT1_REGISTER_FINISH : std_logic;
 signal PR_WRITE_FLAG : std_logic;
 signal NEXT_PR_IN : std_logic_vector(15 downto 0);
 signal PR_OUT : std_logic_vector(15 downto 0);
@@ -120,6 +121,7 @@ begin
 	CLOCK_GEN_COMPONENT: clk_gen port map(
 	CLK => CLK_SLOW,
 	CLK_FT1 => CLK_FT1, 
+	CLK_FT2LOAD => CLK_FT2LOAD,
 	CLK_FT2 => CLK_FT2, 
 	CLK_DC => CLK_DC, 
 	CLK_MA => CLK_MA, 
@@ -127,7 +129,6 @@ begin
 	CLK_WB => CLK_WB);
 	
 	STATE_LED1 <= CLK_FT1;
-	FT1_COMPLETE : sync_jk_ff port map(CLK => CLK_SLOW, J => CLK_FT1, K => CLK_FT2, Q => FT1_REGISTER_FINISH);
 	
 	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PR_OUT, DATA_OUT => PR_OUT_REG_OUT);
 	
@@ -135,7 +136,7 @@ begin
 	AIN => PR_OUT_REG_OUT, 
 	BIN => "0000000000000001", 
 	SUM(15 downto 0) => PR_OUT_PLUS1);
-	PROM_MX : multiplexer_16bit_2ways port map( SELECTOR => FT1_REGISTER_FINISH,
+	PROM_MX : multiplexer_16bit_2ways port map( SELECTOR => CLK_FT2LOAD or CLK_FT2,
 	DATA_IN_1 => PR_OUT, 
 	DATA_IN_2 => PR_OUT_PLUS1, 
 	DATA_OUT => PROM_ADDR_IN );
@@ -159,7 +160,7 @@ begin
 	DIGIT_SELECT => DIGITA_SELECT);
 
 	DEC2: bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => PROM_OUT, 
+	BIN_IN => OP2_OUT, 
 	SEG7 => SEG7B, 
 	DIGIT_SELECT => DIGITB_SELECT);
 end RTL;
