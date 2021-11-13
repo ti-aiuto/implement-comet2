@@ -6,34 +6,34 @@ entity fetch_input is
 	port(
 		CLK_FT : in std_logic; 
 		P_COUNT : in std_logic_vector(15 downto 0);
-		PROM_OUT : out std_logic_vector(7 downto 0)
+		PROM_OUT : out std_logic_vector(15 downto 0)
 	);
 end fetch_input;
 
 architecture RTL of fetch_input is
 
-subtype WORD is std_logic_vector(0 to 7);
+subtype WORD is std_logic_vector(0 to 15);
 
 type MEMORY is array (0 to 15) of WORD;
 
 constant MEM : MEMORY := 
 	(
-		"00000001", 
-		"00000010", 
-		"00000100", 
-		"00001000", 
-		"00010000", 
-		"00100000", 
-		"01000000", 
-		"10000000",
-		"00000001", 
-		"00000011", 
-		"00000101", 
-		"00001001", 
-		"00010001", 
-		"00100001", 
-		"01000001", 
-		"10000001"
+		"0000000100000010", 
+		"0000010000001000", 
+		"0001000000100000", 
+		"0100000010000000",
+		"0000000100000011", 
+		"0000010100001001", 
+		"0001000100100001", 
+		"0100000110000001",
+		"0000000100000010", 
+		"0000010000001000", 
+		"0001000000100000", 
+		"0100000010000000",
+		"0000000100000011", 
+		"0000010100001001", 
+		"0001000100100001", 
+		"0100000110000001"
 	);
 
 begin 
