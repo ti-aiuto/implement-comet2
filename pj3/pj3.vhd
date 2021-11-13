@@ -33,6 +33,7 @@ component clk_gen
 		CLK : in std_logic;
 		CLK_FT1 : out std_logic;
 		CLK_FT2 : out std_logic;
+		CLK_DC : out std_logic;
 		CLK_MA : out std_logic;
 		CLK_EX : out std_logic;
 		CLK_WB : out std_logic
@@ -75,6 +76,7 @@ signal CLK_SLOW : std_logic;
 
 signal CLK_FT1 : std_logic;
 signal CLK_FT2 : std_logic;
+signal CLK_DC : std_logic;
 signal CLK_MA : std_logic;
 signal CLK_EX : std_logic;
 signal CLK_WB : std_logic;
@@ -91,6 +93,7 @@ begin
 	CLK => CLK_IN,
 	CLK_FT1 => CLK_FT1, 
 	CLK_FT2 => CLK_FT2, 
+	CLK_DC => CLK_DC, 
 	CLK_MA => CLK_MA, 
 	CLK_EX => CLK_EX, 
 	CLK_WB => CLK_WB);
