@@ -163,6 +163,16 @@ signal GRA5_SELECTED: std_logic;
 signal GRA6_SELECTED: std_logic;
 signal GRA7_SELECTED: std_logic;
 
+signal USE_ZERO_AS_GRA_FLAG: std_logic;
+signal GRA_OR_ZERO: std_logic_vector(15 downto 0);
+signal ALU_DATA_IN_A: std_logic_vector(15 downto 0);
+
+signal USE_RAM_AS_GRB_FLAG : std_logic;
+signal GRB_OR_RAM : std_logic_vector(15 downto 0);
+signal ALU_DATA_IN_B: std_logic_vector(15 downto 0);
+
+signal OP_IS_LAD_FLAG : std_logic;
+
 begin
 	CLOCK_7SEG_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW_7SEG);
 	CLOCK_COMPONENT: clock_down port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW);
@@ -259,11 +269,14 @@ begin
 		DATA_IN_8 => GR7_OUT, 
 		DATA_OUT => GRB_OUT
 	);
-	
-	USE_RAM_ADDR_AS_DATA_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
+
+	-- ここにどの命令か判定するフラグを作っていく
+	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
+
+	USE_RAM_ADDR_AS_DATA_FLAG <= OP_IS_LAD_FLAG;
 	
 	RAM_MX : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_ADDR_AS_DATA_FLAG, 
-	DATA_IN_1 => "0000000000000000", 
+	DATA_IN_1 => "0000000000000000", -- ここにRAMからの値を入れる
 	DATA_IN_2 => OP2_PLUS_GRB_REG_OUT,
 	DATA_OUT	=> EFFECTIVE_ADDR_OR_RAM_OUT);
 	
@@ -271,8 +284,27 @@ begin
 	DATA_IN => EFFECTIVE_ADDR_OR_RAM_OUT, 
 	DATA_OUT => EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT);
 	
-	-- 仮実装
-	ALU_DATA <= EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT;
+	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG;
+	
+	MX_GRA_OR_ZERO : multiplexer_16bit_2ways port map( SELECTOR => USE_ZERO_AS_GRA_FLAG, 
+	DATA_IN_1 => GRA_OUT_REG_OUT, 
+	DATA_IN_2 => "0000000000000000", 
+	DATA_OUT => GRA_OR_ZERO);
+	
+	USE_RAM_AS_GRB_FLAG <= OP_IS_LAD_FLAG;
+	MX_GRB_OR_RAM : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_AS_GRB_FLAG, 
+	DATA_IN_1 => GRB_OUT_REG_OUT, 
+	DATA_IN_2 => EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT, 
+	DATA_OUT => GRB_OR_RAM);
+	
+	ALU_DATA_IN_A <= GRA_OR_ZERO;
+	ALU_DATA_IN_B <= GRB_OR_RAM;
+	
+	ALU_ADDER : adder_16bit port map( CI => '0', 
+	AIN => ALU_DATA_IN_A, 
+	BIN => ALU_DATA_IN_B, 
+	SUM(15 downto 0) => ALU_DATA); -- TODO: ここでOFとかのセット必要
+	
 	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK_EX, DATA_IN => ALU_DATA, DATA_OUT => ALU_DATA_REG_OUT);
 
 	NEXT_GR_DATA <= ALU_DATA_REG_OUT;
