@@ -123,6 +123,7 @@ signal PR_OUT_PLUS1 : std_logic_vector(15 downto 0);
 signal PROM_ADDR_IN : std_logic_vector(15 downto 0);
 
 signal GR_WRITE_FLAG : std_logic;
+signal NEXT_GR_DATA : std_logic_vector(15 downto 0);
 
 signal GR0_OUT : std_logic_vector(15 downto 0);
 signal GR1_OUT : std_logic_vector(15 downto 0);
@@ -133,6 +134,9 @@ signal GR5_OUT : std_logic_vector(15 downto 0);
 signal GR6_OUT : std_logic_vector(15 downto 0);
 signal GR7_OUT : std_logic_vector(15 downto 0);
 
+signal MAIN_OP : std_logic_vector(3 downto 0);
+signal SUB_OP : std_logic_vector(3 downto 0);
+
 signal GRA_SELECT : std_logic_vector(2 downto 0);
 signal GRB_SELECT : std_logic_vector(2 downto 0);
 signal GRA_OUT : std_logic_vector(15 downto 0);
@@ -142,6 +146,22 @@ signal GRB_OUT_REG_OUT : std_logic_vector(15 downto 0);
 
 signal OP2_PLUS_GRB : std_logic_vector(15 downto 0);
 signal OP2_PLUS_GRB_REG_OUT : std_logic_vector(15 downto 0);
+
+signal USE_RAM_ADDR_AS_DATA_FLAG : std_logic;
+signal EFFECTIVE_ADDR_OR_RAM_OUT : std_logic_vector(15 downto 0);
+signal EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT : std_logic_vector(15 downto 0);
+
+signal ALU_DATA : std_logic_vector(15 downto 0);
+signal ALU_DATA_REG_OUT : std_logic_vector(15 downto 0);
+
+signal GRA0_SELECTED: std_logic;
+signal GRA1_SELECTED: std_logic;
+signal GRA2_SELECTED: std_logic;
+signal GRA3_SELECTED: std_logic;
+signal GRA4_SELECTED: std_logic;
+signal GRA5_SELECTED: std_logic;
+signal GRA6_SELECTED: std_logic;
+signal GRA7_SELECTED: std_logic;
 
 begin
 	CLOCK_7SEG_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW_7SEG);
@@ -178,18 +198,32 @@ begin
 	
 	PR_WRITE_FLAG <= '1';
 	
+	MAIN_OP <= OP1_OUT(15 downto 12);
+	SUB_OP <= OP1_OUT(11 downto 8);
+	
 	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PROM_OUT, DATA_OUT => OP1_OUT);
 	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, DATA_IN => PROM_OUT, DATA_OUT => OP2_OUT);
 	PR : register_16 port map(CLK_IN => CLK_WB and PR_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
 	
-	GR0 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR0_OUT);
-	GR1 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000001111", DATA_OUT => GR1_OUT);
-	GR2 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000011111", DATA_OUT => GR2_OUT);
-	GR3 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR3_OUT);
-	GR4 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR4_OUT);
-	GR5 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR5_OUT);
-	GR6 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR6_OUT);
-	GR7 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG, DATA_IN => "0000000000000000", DATA_OUT => GR7_OUT);
+	-- 仮実装
+	GR_WRITE_FLAG <= '1';
+	
+	GRA0_SELECTED <= not GRA_SELECT(2) and not GRA_SELECT(1) and not GRA_SELECT(0);
+	GRA1_SELECTED <= not GRA_SELECT(2) and not GRA_SELECT(1) and GRA_SELECT(0);
+	GRA2_SELECTED <= not GRA_SELECT(2) and GRA_SELECT(1) and not GRA_SELECT(0);
+	GRA3_SELECTED <= not GRA_SELECT(2) and GRA_SELECT(1) and GRA_SELECT(0);
+	GRA4_SELECTED <= GRA_SELECT(2) and not GRA_SELECT(1) and not GRA_SELECT(0);
+	GRA5_SELECTED <= GRA_SELECT(2) and not GRA_SELECT(1) and GRA_SELECT(0);
+	GRA6_SELECTED <= GRA_SELECT(2) and GRA_SELECT(1) and not GRA_SELECT(0);
+	GRA7_SELECTED <= GRA_SELECT(2) and GRA_SELECT(1) and GRA_SELECT(0);
+	GR0 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG and GRA0_SELECTED, DATA_IN => NEXT_GR_DATA, DATA_OUT => GR0_OUT);
+	GR1 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG and GRA1_SELECTED, DATA_IN => NEXT_GR_DATA, DATA_OUT => GR1_OUT);
+	GR2 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG and GRA2_SELECTED, DATA_IN => NEXT_GR_DATA, DATA_OUT => GR2_OUT);
+	GR3 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG and GRA3_SELECTED, DATA_IN => NEXT_GR_DATA, DATA_OUT => GR3_OUT);
+	GR4 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG and GRA4_SELECTED, DATA_IN => NEXT_GR_DATA, DATA_OUT => GR4_OUT);
+	GR5 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG and GRA5_SELECTED, DATA_IN => NEXT_GR_DATA, DATA_OUT => GR5_OUT);
+	GR6 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG and GRA6_SELECTED, DATA_IN => NEXT_GR_DATA, DATA_OUT => GR6_OUT);
+	GR7 : register_16 port map(CLK_IN => CLK_WB and GR_WRITE_FLAG and GRA7_SELECTED, DATA_IN => NEXT_GR_DATA, DATA_OUT => GR7_OUT);
 	
 	GRA_SELECT <= OP1_OUT(6 downto 4);
 	GRB_SELECT <= OP1_OUT(2 downto 0);
@@ -226,15 +260,33 @@ begin
 		DATA_OUT => GRB_OUT
 	);
 	
+	USE_RAM_ADDR_AS_DATA_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
+	
+	RAM_MX : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_ADDR_AS_DATA_FLAG, 
+	DATA_IN_1 => "0000000000000000", 
+	DATA_IN_2 => OP2_PLUS_GRB_REG_OUT,
+	DATA_OUT	=> EFFECTIVE_ADDR_OR_RAM_OUT);
+	
+	RAM_DATA_REGISTER : register_16 port map( CLK_IN => CLK_MA, 
+	DATA_IN => EFFECTIVE_ADDR_OR_RAM_OUT, 
+	DATA_OUT => EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT);
+	
+	-- 仮実装
+	ALU_DATA <= EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT;
+	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK_EX, DATA_IN => ALU_DATA, DATA_OUT => ALU_DATA_REG_OUT);
+
+	NEXT_GR_DATA <= ALU_DATA_REG_OUT;
+	-- ここにRAMに入れる実装もいる
+	
 	ROM : prom port map(P_COUNT => PROM_ADDR_IN, PROM_OUT => PROM_OUT);
 	
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => OP1_OUT, 
+	BIN_IN => GR1_OUT, 
 	SEG7 => SEG7A, 
 	DIGIT_SELECT => DIGITA_SELECT);
 
 	DEC2: bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => OP2_PLUS_GRB_REG_OUT, 
+	BIN_IN => GR2_OUT, 
 	SEG7 => SEG7B, 
 	DIGIT_SELECT => DIGITB_SELECT);
 end RTL;
