@@ -9,7 +9,8 @@ entity pj3 is
 		SEG7A : out std_logic_vector(6 downto 0);
 		DIGITA_SELECT : out std_logic_vector(5 downto 0);
 		SEG7B : out std_logic_vector(6 downto 0);
-		DIGITB_SELECT : out std_logic_vector(5 downto 0)
+		DIGITB_SELECT : out std_logic_vector(5 downto 0);
+		STATE_LED1 : out std_logic
 	);
 end pj3;
 
@@ -82,6 +83,15 @@ component multiplexer_16bit_2ways is
 	);
 end component;
 
+component sync_jk_ff is
+	port(
+		CLK : in std_logic;
+		J : in std_logic;
+		K : in std_logic;
+		Q : out std_logic
+	);
+end component;
+
 signal CLK_SLOW_7SEG : std_logic;
 signal CLK_SLOW : std_logic;
 
@@ -92,16 +102,17 @@ signal CLK_MA : std_logic;
 signal CLK_EX : std_logic;
 signal CLK_WB : std_logic;
 
-signal REGISTER_A_OUT : std_logic_vector(15 downto 0);
-signal REGISTER_B_OUT : std_logic_vector(15 downto 0);
+signal OP1_OUT : std_logic_vector(15 downto 0);
+signal OP2_OUT : std_logic_vector(15 downto 0);
 signal PROM_OUT : std_logic_vector(15 downto 0);
 
-signal RAM_WRITE_FLAG : std_logic;
+signal FT1_REGISTER_FINISH : std_logic;
+signal PR_WRITE_FLAG : std_logic;
 signal NEXT_PR_IN : std_logic_vector(15 downto 0);
 signal PR_OUT : std_logic_vector(15 downto 0);
-signal PR_OUT_PLUS1 : std_logic_vector(16 downto 0);
+signal PR_OUT_REG_OUT : std_logic_vector(15 downto 0);
+signal PR_OUT_PLUS1 : std_logic_vector(15 downto 0);
 signal PROM_ADDR_IN : std_logic_vector(15 downto 0);
-
 
 begin
 	CLOCK_7SEG_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW_7SEG);
@@ -114,29 +125,41 @@ begin
 	CLK_MA => CLK_MA, 
 	CLK_EX => CLK_EX, 
 	CLK_WB => CLK_WB);
-		
-	PROM_ADDER : adder_16bit port map( CI => '0', AIN => PR_OUT, BIN => "0000000000000001", SUM => PR_OUT_PLUS1);
-	PROM_MX : multiplexer_16bit_2ways port map( SELECTOR => CLK_FT1,
+	
+	STATE_LED1 <= CLK_FT1;
+	FT1_COMPLETE : sync_jk_ff port map(CLK => CLK_SLOW, J => CLK_FT1, K => CLK_FT2, Q => FT1_REGISTER_FINISH);
+	
+	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PR_OUT, DATA_OUT => PR_OUT_REG_OUT);
+	
+	PROM_ADDER : adder_16bit port map( CI => '0', 
+	AIN => PR_OUT_REG_OUT, 
+	BIN => "0000000000000001", 
+	SUM(15 downto 0) => PR_OUT_PLUS1);
+	PROM_MX : multiplexer_16bit_2ways port map( SELECTOR => FT1_REGISTER_FINISH,
 	DATA_IN_1 => PR_OUT, 
-	DATA_IN_2 => PR_OUT_PLUS1(15 downto 0), 
+	DATA_IN_2 => PR_OUT_PLUS1, 
 	DATA_OUT => PROM_ADDR_IN );
 	
-	NEXT_PR_IN <= "0000000000000000";
-	RAM_WRITE_FLAG <= RESET_IN;
+	NEXT_PR_MX : multiplexer_16bit_2ways port map( SELECTOR => RESET_IN, 
+	DATA_IN_1 => PR_OUT_PLUS1, 
+	DATA_IN_2 => "0000000000000000", 
+	DATA_OUT => NEXT_PR_IN );
 	
-	REGISTER_A : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PROM_OUT, DATA_OUT => REGISTER_A_OUT);
-	REGISTER_B : register_16 port map(CLK_IN => CLK_FT2, DATA_IN => PROM_OUT, DATA_OUT => REGISTER_B_OUT);
-	PR : register_16 port map(CLK_IN => CLK_WB and RAM_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
+	PR_WRITE_FLAG <= '1';
+	
+	REGISTER_A : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PROM_OUT, DATA_OUT => OP1_OUT);
+	REGISTER_B : register_16 port map(CLK_IN => CLK_FT2, DATA_IN => PROM_OUT, DATA_OUT => OP2_OUT);
+	PR : register_16 port map(CLK_IN => CLK_WB and PR_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
 	
 	MEMORY : prom port map(P_COUNT => PROM_ADDR_IN, PROM_OUT => PROM_OUT);
 	
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => REGISTER_A_OUT, 
+	BIN_IN => OP1_OUT, 
 	SEG7 => SEG7A, 
 	DIGIT_SELECT => DIGITA_SELECT);
 
 	DEC2: bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => REGISTER_B_OUT, 
+	BIN_IN => PROM_OUT, 
 	SEG7 => SEG7B, 
 	DIGIT_SELECT => DIGITB_SELECT);
 end RTL;

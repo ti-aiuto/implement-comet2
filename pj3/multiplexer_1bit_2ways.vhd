@@ -13,5 +13,5 @@ end multiplexer_1bit_2ways;
 architecture RTL of multiplexer_1bit_2ways is
 
 begin
-	DATA_OUT <= (DATA_IN_1 and SELECTOR) or (DATA_IN_2 and not SELECTOR);
+	DATA_OUT <= (DATA_IN_1 and not SELECTOR) or (DATA_IN_2 and SELECTOR);
 end RTL;
