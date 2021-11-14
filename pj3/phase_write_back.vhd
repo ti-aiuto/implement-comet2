@@ -71,10 +71,6 @@ end component;
 	signal WORDS_COUNT_TO_ADD : std_logic_vector(15 downto 0);
 	signal PR_WORD_ADDED : std_logic_vector(15 downto 0);
 
-	signal INTERNAL_NEXT_PR : std_logic_vector(15 downto 0);
-	signal INTERNAL_WRITE_GR_FLAG : std_logic;
-	signal INTERNAL_WRITE_PR_FLAG : std_logic;
-	signal INTERNAL_WRITE_FR_FLAG : std_logic;
 begin
 	OP_IS_LD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and 
 		((not SUB_OP(3) and not SUB_OP(2) and not SUB_OP(1) and not SUB_OP(0)) or (not SUB_OP(3) and SUB_OP(2) and not SUB_OP(1) and not SUB_OP(0)));
@@ -83,7 +79,7 @@ begin
 	OP_IS_ADD_SUB_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0));
 	WORD_LENGTH_2_FLAG <= (OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG) AND (not SUB_OP(3) and not SUB_OP(2)); -- 0,1,2,3が2語命令
 	
-	INTERNAL_WRITE_FR_FLAG <= OP_IS_LD_FLAG OR OP_IS_ADD_SUB_FLAG;
+	WRITE_FR_FLAG <= OP_IS_LD_FLAG OR OP_IS_ADD_SUB_FLAG;
 	
 	-- 1語命令か2語命令か判定
 	WORD_COUNT_MUX : multiplexer_16bit_2ways port map(
@@ -95,16 +91,13 @@ begin
 	-- ここで足すか結果を切り替える
 	PR_ADDER : adder_16bit port map( CI => '0', AIN => CURRENT_PR, BIN => WORDS_COUNT_TO_ADD, SUM(15 downto 0) => PR_WORD_ADDED);	
 	
-	INTERNAL_WRITE_GR_FLAG <= OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;
-	INTERNAL_WRITE_PR_FLAG <= RESET_IN OR OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;	
+	-- このへんはWBの立ち上がりで使うものなのでレジスタで覚えない
+	WRITE_GR_FLAG <= OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;
+	WRITE_PR_FLAG <= RESET_IN OR OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;	
 	
+	-- execにうつしてもいいかも
 	NEXT_PR_MX : multiplexer_16bit_2ways port map( SELECTOR => RESET_IN, 
 	DATA_IN_1 => PR_WORD_ADDED, 
 	DATA_IN_2 => "0000000000000000", -- reset
-	DATA_OUT => INTERNAL_NEXT_PR );
-	
-	GR_REGISTER : register_1 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_WRITE_GR_FLAG, DATA_OUT => WRITE_GR_FLAG);
-	PR_REGISTER : register_1 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_WRITE_PR_FLAG, DATA_OUT => WRITE_PR_FLAG);
-	FR_REGISTER : register_1 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_WRITE_FR_FLAG, DATA_OUT => WRITE_FR_FLAG);
-	NEXT_PR_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_NEXT_PR, DATA_OUT => NEXT_PR);
+	DATA_OUT => NEXT_PR );
 end RTL;
