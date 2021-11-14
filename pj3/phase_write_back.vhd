@@ -66,6 +66,8 @@ end component;
 	signal OP_IS_LD_FLAG : std_logic;
 	signal OP_IS_LAD_FLAG : std_logic;
 	signal OP_IS_LD_LAD_FLAG : std_logic;
+	signal OP_IS_CP_FLAG : std_logic;
+
 	signal WORD_LENGTH_2_FLAG : std_logic;
 
 	signal WORDS_COUNT_TO_ADD : std_logic_vector(15 downto 0);
@@ -77,9 +79,11 @@ begin
 	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
 	OP_IS_LD_LAD_FLAG <= OP_IS_LD_FLAG OR OP_IS_LAD_FLAG;
 	OP_IS_ADD_SUB_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0));
+	OP_IS_CP_FLAG <= not MAIN_OP(3) and MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0);
+	
 	WORD_LENGTH_2_FLAG <= (OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG) AND (not SUB_OP(3) and not SUB_OP(2)); -- 0,1,2,3が2語命令
 	
-	WRITE_FR_FLAG <= OP_IS_LD_FLAG OR OP_IS_ADD_SUB_FLAG;
+	WRITE_FR_FLAG <= OP_IS_LD_FLAG OR OP_IS_ADD_SUB_FLAG OR OP_IS_CP_FLAG;
 	
 	-- 1語命令か2語命令か判定
 	WORD_COUNT_MUX : multiplexer_16bit_2ways port map(

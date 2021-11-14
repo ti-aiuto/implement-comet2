@@ -3,10 +3,9 @@ use IEEE.std_logic_1164.all;
 
 entity alu is
 	port(
-		MAIN_OP : in std_logic_vector(3 downto 0);
-		SUB_OP : in std_logic_vector(3 downto 0);
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
+		SUB_FLAG : in std_logic;
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -44,14 +43,10 @@ signal DATA_B_NEGATED : std_logic_vector(15 downto 0);
 signal USE_NEGATED_DATAB_FLAG: std_logic;
 signal DATA_B_OR_NEGATED_DATA_B : std_logic_vector(15 downto 0);
 
-signal OP_IS_SUB_FLAG : std_logic;
-
 begin
-	OP_IS_SUB_FLAG <= SUB_OP(0);
-
 	-- 引き算
-	USE_NEGATED_DATAB_FLAG <= OP_IS_SUB_FLAG;
-	SET_ALU_ADDER_CI_FLAG <= OP_IS_SUB_FLAG;
+	USE_NEGATED_DATAB_FLAG <= SUB_FLAG;
+	SET_ALU_ADDER_CI_FLAG <= SUB_FLAG;
 	
 	NOT_NEGATE_DATAB : not_16bit port map(DATA_IN => DATA_IN_B, DATA_OUT => DATA_B_NEGATED);
 	

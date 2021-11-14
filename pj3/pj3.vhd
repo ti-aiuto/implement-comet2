@@ -305,7 +305,7 @@ begin
 	);
 		
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => Gr1_OUT, 
+	BIN_IN => GR2_OUT, 
 	SEG7 => SEG7A, 
 	DIGIT_SELECT => DIGITA_SELECT);
 
