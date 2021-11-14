@@ -21,8 +21,8 @@ component register_1 is
 end component;
 
 begin
-	DFF1 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(0), DATA_OUT => DATA_OUT(0));
-	DFF2 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(1), DATA_OUT => DATA_OUT(1));
-	DFF3 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(2), DATA_OUT => DATA_OUT(2));
-	DFF4 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(3), DATA_OUT => DATA_OUT(3));
+	REGISTER1 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(0), DATA_OUT => DATA_OUT(0));
+	REGISTER2 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(1), DATA_OUT => DATA_OUT(1));
+	REGISTER3 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(2), DATA_OUT => DATA_OUT(2));
+	REGISTER4 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(3), DATA_OUT => DATA_OUT(3));
 end RTL;
