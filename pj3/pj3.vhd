@@ -84,21 +84,6 @@ component multiplexer_16bit_2ways is
 	);
 end component;
 
-component multiplexer_16bit_8ways is
-	port(
-		SELECTOR : in std_logic_vector(2 downto 0);
-		DATA_IN_1 : in std_logic_vector(15 downto 0);
-		DATA_IN_2 : in std_logic_vector(15 downto 0);
-		DATA_IN_3 : in std_logic_vector(15 downto 0);
-		DATA_IN_4 : in std_logic_vector(15 downto 0);
-		DATA_IN_5 : in std_logic_vector(15 downto 0);
-		DATA_IN_6 : in std_logic_vector(15 downto 0);
-		DATA_IN_7 : in std_logic_vector(15 downto 0);
-		DATA_IN_8 : in std_logic_vector(15 downto 0);
-		DATA_OUT : out std_logic_vector(15 downto 0)
-	);
-end component;
-
 component gr_controller is
 	port(
 		CLK : in std_logic;
@@ -124,6 +109,28 @@ component alu is
 		DATA_IN_B: in std_logic_vector(15 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		DATA_OF : out std_logic
+	);
+end component;
+
+component phrase_decode is
+	port(
+		CLK : in std_logic;
+		OP1_IN : std_logic_vector(15 downto 0);
+		OP2_IN : std_logic_vector(15 downto 0);
+		GR0_IN : in std_logic_vector(15 downto 0);
+		GR1_IN : in std_logic_vector(15 downto 0);
+		GR2_IN : in std_logic_vector(15 downto 0);
+		GR3_IN : in std_logic_vector(15 downto 0);
+		GR4_IN : in std_logic_vector(15 downto 0);
+		GR5_IN : in std_logic_vector(15 downto 0);
+		GR6_IN : in std_logic_vector(15 downto 0);
+		GR7_IN : in std_logic_vector(15 downto 0);
+		GRA_SELECT : out std_logic_vector(2 downto 0);
+		GRA_OUT : out std_logic_vector(15 downto 0);
+		GRB_OUT : out std_logic_vector(15 downto 0);
+		MAIN_OP : out std_logic_vector(3 downto 0);
+		SUB_OP : out std_logic_vector(3 downto 0);
+		EFFECTIVE_ADDR : out std_logic_vector(15 downto 0)
 	);
 end component;
 
@@ -172,10 +179,9 @@ signal GRB_OUT : std_logic_vector(15 downto 0);
 signal GRA_OUT_REG_OUT : std_logic_vector(15 downto 0);
 signal GRB_OUT_REG_OUT : std_logic_vector(15 downto 0);
 
-signal OP2_PLUS_GRB : std_logic_vector(15 downto 0);
-signal OP2_PLUS_GRB_REG_OUT : std_logic_vector(15 downto 0);
 
 signal USE_RAM_ADDR_AS_DATA_FLAG : std_logic;
+signal EFFECTIVE_ADDR : std_logic_vector(15 downto 0);
 signal EFFECTIVE_ADDR_OR_RAM_OUT : std_logic_vector(15 downto 0);
 signal EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT : std_logic_vector(15 downto 0);
 
@@ -227,14 +233,31 @@ begin
 	DATA_IN_2 => "0000000000000000", 
 	DATA_OUT => NEXT_PR_IN );
 	
-	PR_WRITE_FLAG <= '1';
-	
-	MAIN_OP <= OP1_OUT(15 downto 12);
-	SUB_OP <= OP1_OUT(11 downto 8);
+	PR_WRITE_FLAG <= '1';	
 	
 	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PROM_OUT, DATA_OUT => OP1_OUT);
 	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, DATA_IN => PROM_OUT, DATA_OUT => OP2_OUT);
 	PR : register_16 port map(CLK_IN => CLK_WB and PR_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
+	
+	PHRASE_DECODE_INSTANCE : phrase_decode port map(
+		CLK => CLK_DC, 
+		OP1_IN => OP1_OUT,
+		OP2_IN => OP2_OUT,
+		GR0_IN => GR0_OUT,
+		GR1_IN => GR1_OUT,
+		GR2_IN => GR2_OUT,
+		GR3_IN => GR3_OUT,
+		GR4_IN => GR4_OUT,
+		GR5_IN => GR5_OUT,
+		GR6_IN => GR6_OUT,
+		GR7_IN => GR7_OUT,
+		GRA_SELECT => GRA_SELECT, 
+		GRA_OUT => GRA_OUT, 
+		GRB_OUT => GRB_OUT, 
+		MAIN_OP => MAIN_OP, 
+		SUB_OP => SUB_OP, 
+		EFFECTIVE_ADDR => EFFECTIVE_ADDR
+	);
 	
 	-- 仮実装
 	GR_WRITE_FLAG <= '1';
@@ -252,41 +275,6 @@ begin
 	GR6_OUT => GR6_OUT, 
 	GR7_OUT => GR7_OUT);
 	
-	GRA_SELECT <= OP1_OUT(6 downto 4);
-	GRB_SELECT <= OP1_OUT(2 downto 0);
-	
-	GRA_REGISTER : register_16 port map(CLK_IN => CLK_DC, DATA_IN => GRA_OUT, DATA_OUT => GRA_OUT_REG_OUT);
-	GRB_REGISTER : register_16 port map(CLK_IN => CLK_DC, DATA_IN => GRB_OUT, DATA_OUT => GRB_OUT_REG_OUT);
-
-	OP2_PLUS_GRB_ADDER : adder_16bit port map( CI => '0', AIN => OP2_OUT, BIN => GRB_OUT, SUM(15 downto 0) => OP2_PLUS_GRB );
-	OP2_PLUS_GRB_REGISTER : register_16 port map(CLK_IN => CLK_DC, DATA_IN => OP2_PLUS_GRB, DATA_OUT => OP2_PLUS_GRB_REG_OUT);
-	
-	MX_GRA: multiplexer_16bit_8ways port map(
-		SELECTOR => GRA_SELECT, 
-		DATA_IN_1 => GR0_OUT, 
-		DATA_IN_2 => GR1_OUT, 
-		DATA_IN_3 => GR2_OUT, 
-		DATA_IN_4 => GR3_OUT, 
-		DATA_IN_5 => GR4_OUT, 
-		DATA_IN_6 => GR5_OUT, 
-		DATA_IN_7 => GR6_OUT, 
-		DATA_IN_8 => GR7_OUT, 
-		DATA_OUT => GRA_OUT
-	);
-	
-	MX_GRB: multiplexer_16bit_8ways port map(
-		SELECTOR => GRB_SELECT, 
-		DATA_IN_1 => "0000000000000000", -- 指標レジスタはGR0不可 
-		DATA_IN_2 => GR1_OUT, 
-		DATA_IN_3 => GR2_OUT, 
-		DATA_IN_4 => GR3_OUT, 
-		DATA_IN_5 => GR4_OUT, 
-		DATA_IN_6 => GR5_OUT, 
-		DATA_IN_7 => GR6_OUT, 
-		DATA_IN_8 => GR7_OUT, 
-		DATA_OUT => GRB_OUT
-	);
-
 	-- ここにどの命令か判定するフラグを作っていく
 	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
 	OP_IS_SUB1_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and not SUB_OP(1) and SUB_OP(0));
@@ -295,7 +283,7 @@ begin
 
 	RAM_MX : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_ADDR_AS_DATA_FLAG, 
 	DATA_IN_1 => "0000000000000000", -- ここにRAMからの値を入れる
-	DATA_IN_2 => OP2_PLUS_GRB_REG_OUT,
+	DATA_IN_2 => EFFECTIVE_ADDR,
 	DATA_OUT	=> EFFECTIVE_ADDR_OR_RAM_OUT);
 	
 	RAM_DATA_REGISTER : register_16 port map( CLK_IN => CLK_MA, 
@@ -305,13 +293,13 @@ begin
 	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG;
 	
 	MX_GRA_OR_ZERO : multiplexer_16bit_2ways port map( SELECTOR => USE_ZERO_AS_GRA_FLAG, 
-	DATA_IN_1 => GRA_OUT_REG_OUT, 
+	DATA_IN_1 => GRA_OUT, 
 	DATA_IN_2 => "0000000000000000", 
 	DATA_OUT => GRA_OR_ZERO);
 	
 	USE_RAM_AS_GRB_FLAG <= OP_IS_LAD_FLAG;
 	MX_GRB_OR_RAM : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_AS_GRB_FLAG, 
-	DATA_IN_1 => GRB_OUT_REG_OUT, 
+	DATA_IN_1 => GRB_OUT, 
 	DATA_IN_2 => EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT, 
 	DATA_OUT => GRB_OR_RAM);
 		
