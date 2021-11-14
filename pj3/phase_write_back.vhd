@@ -19,15 +19,6 @@ end phase_write_back;
 
 architecture RTL of phase_write_back is
 
-component register_1 is
-	port(
-		CLK_IN : in std_logic;
-		WRITE_FLAG : in std_logic;
-		DATA_IN : in std_logic;
-		DATA_OUT : out std_logic
-	);
-end component;
-
 component register_16 is
 	port(
 		CLK_IN : in std_logic;

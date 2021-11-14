@@ -52,5 +52,5 @@ constant MEM : MEMORY :=
 	);
 
 begin 
-	PROM_OUT <= MEM(conv_integer(P_COUNT(3 downto 0)));
+	PROM_OUT <= MEM(conv_integer(P_COUNT(4 downto 0)));
 end RTL;
