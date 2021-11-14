@@ -10,7 +10,7 @@ entity clock_down is
 end clock_down;
 
 architecture RTL of clock_down is
-signal COUNT : std_logic_vector(21 downto 0);
+signal COUNT : std_logic_vector(20 downto 0);
 
 begin
 	process(CLK_IN)
@@ -19,5 +19,5 @@ begin
 			COUNT <= COUNT + 1;
 		end if;
 	end process;
-	CLK_OUT <= COUNT(21);
+	CLK_OUT <= COUNT(20);
 end RTL;
