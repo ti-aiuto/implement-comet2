@@ -197,7 +197,6 @@ signal GRB_OR_RAM : std_logic_vector(15 downto 0);
 signal ALU_DATA_IN_B: std_logic_vector(15 downto 0);
 
 signal OP_IS_LAD_FLAG : std_logic;
-signal OP_IS_SUB1_FLAG : std_logic;
 
 begin
 	CLOCK_7SEG_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW_7SEG);
@@ -277,7 +276,6 @@ begin
 	
 	-- ここにどの命令か判定するフラグを作っていく
 	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
-	OP_IS_SUB1_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and not SUB_OP(1) and SUB_OP(0));
 	
 	USE_RAM_ADDR_AS_DATA_FLAG <= OP_IS_LAD_FLAG;
 
