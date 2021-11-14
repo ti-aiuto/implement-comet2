@@ -8,7 +8,7 @@ entity alu is
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0);
-		DATA_OF : out std_logic
+		OF_OUT : out std_logic
 	);
 end alu;
 
@@ -65,6 +65,6 @@ begin
 	BIN => DATA_B_OR_NEGATED_DATA_B, 
 	SUM(15 downto 0) => DATA_OUT); -- TODO: ここでOFとかのセット必要
 
-	DATA_OF <= '0'; -- TODO: set
+	OF_OUT <= '0'; -- TODO: set
 end RTL;
 

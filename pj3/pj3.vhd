@@ -101,17 +101,6 @@ component gr_controller is
 	);
 end component;
 
-component alu is
-	port(
-		MAIN_OP : in std_logic_vector(3 downto 0);
-		SUB_OP : in std_logic_vector(3 downto 0);
-		DATA_IN_A: in std_logic_vector(15 downto 0);
-		DATA_IN_B: in std_logic_vector(15 downto 0);
-		DATA_OUT : out std_logic_vector(15 downto 0);
-		DATA_OF : out std_logic
-	);
-end component;
-
 component phase_decode is
 	port(
 		CLK : in std_logic;
@@ -145,6 +134,20 @@ component phase_fetch is
 		OP1_OUT : out std_logic_vector(15 downto 0);
 		OP2_OUT : out std_logic_vector(15 downto 0);
 		CURRENT_PR : out std_logic_vector(15 downto 0)
+	);
+end component;
+
+component phase_execute is
+	port(
+		CLK : in std_logic;
+		EFFECTIVE_ADDR : in std_logic_vector(15 downto 0);
+		RAM_DATA : in std_logic_vector(15 downto 0);
+		GRA_DATA : in std_logic_vector(15 downto 0);
+		GRB_DATA : in std_logic_vector(15 downto 0); 
+		MAIN_OP : in std_logic_vector(3 downto 0);
+		SUB_OP : in std_logic_vector(3 downto 0);
+		DATA_OUT : out std_logic_vector(15 downto 0);
+		FR_OUT : out std_logic_vector(2 downto 0)
 	);
 end component;
 
@@ -192,22 +195,10 @@ signal GRB_OUT : std_logic_vector(15 downto 0);
 signal GRA_OUT_REG_OUT : std_logic_vector(15 downto 0);
 signal GRB_OUT_REG_OUT : std_logic_vector(15 downto 0);
 
-
-signal USE_RAM_ADDR_AS_DATA_FLAG : std_logic;
 signal EFFECTIVE_ADDR : std_logic_vector(15 downto 0);
-signal EFFECTIVE_ADDR_OR_RAM_OUT : std_logic_vector(15 downto 0);
-signal EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT : std_logic_vector(15 downto 0);
+signal RAM_DATA : std_logic_vector(15 downto 0);
 
 signal ALU_DATA : std_logic_vector(15 downto 0);
-signal ALU_DATA_REG_OUT : std_logic_vector(15 downto 0);
-
-signal USE_ZERO_AS_GRA_FLAG: std_logic;
-signal GRA_OR_ZERO: std_logic_vector(15 downto 0);
-signal ALU_DATA_IN_A: std_logic_vector(15 downto 0);
-
-signal USE_RAM_AS_GRB_FLAG : std_logic;
-signal GRB_OR_RAM : std_logic_vector(15 downto 0);
-signal ALU_DATA_IN_B: std_logic_vector(15 downto 0);
 
 signal OP_IS_LAD_FLAG : std_logic;
 
@@ -288,39 +279,24 @@ begin
 	-- ここにどの命令か判定するフラグを作っていく
 	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
 	
-	USE_RAM_ADDR_AS_DATA_FLAG <= OP_IS_LAD_FLAG;
-
-	RAM_MX : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_ADDR_AS_DATA_FLAG, 
-	DATA_IN_1 => "0000000000000000", -- ここにRAMからの値を入れる
-	DATA_IN_2 => EFFECTIVE_ADDR,
-	DATA_OUT	=> EFFECTIVE_ADDR_OR_RAM_OUT);
-	
 	RAM_DATA_REGISTER : register_16 port map( CLK_IN => CLK_MA, 
-	DATA_IN => EFFECTIVE_ADDR_OR_RAM_OUT, 
-	DATA_OUT => EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT);
-	
-	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG;
-	
-	MX_GRA_OR_ZERO : multiplexer_16bit_2ways port map( SELECTOR => USE_ZERO_AS_GRA_FLAG, 
-	DATA_IN_1 => GRA_OUT, 
-	DATA_IN_2 => "0000000000000000", 
-	DATA_OUT => GRA_OR_ZERO);
-	
-	USE_RAM_AS_GRB_FLAG <= OP_IS_LAD_FLAG;
-	MX_GRB_OR_RAM : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_AS_GRB_FLAG, 
-	DATA_IN_1 => GRB_OUT, 
-	DATA_IN_2 => EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT, 
-	DATA_OUT => GRB_OR_RAM);
-		
-	ALU_INSTANCE : alu port map(MAIN_OP => MAIN_OP, 
-	SUB_OP => SUB_OP, 
-	DATA_IN_A => GRA_OR_ZERO, 
-	DATA_IN_B => GRB_OR_RAM, 
-	DATA_OUT => ALU_DATA);
-	
-	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK_EX, DATA_IN => ALU_DATA, DATA_OUT => ALU_DATA_REG_OUT);
+	DATA_IN => "0000000000000000", -- ここにRAMからもってくる実装を入れる 
+	DATA_OUT => RAM_DATA);
 
-	NEXT_GR_DATA <= ALU_DATA_REG_OUT;
+	PHASE_EXECUTE_INSTANCE : phase_execute port map
+	(
+		CLK => CLK_EX,
+		EFFECTIVE_ADDR => EFFECTIVE_ADDR,
+		RAM_DATA => RAM_DATA,
+		GRA_DATA => GRA_OUT,
+		GRB_DATA => GRB_OUT,
+		MAIN_OP => MAIN_OP,
+		SUB_OP => SUB_OP,
+		DATA_OUT => ALU_DATA
+		-- OF_OUT : out std_logic
+	);
+	
+	NEXT_GR_DATA <= ALU_DATA;
 	-- ここにRAMに入れる実装もいる
 		
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
