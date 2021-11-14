@@ -12,17 +12,17 @@ end register_4;
 
 architecture RTL of register_4 is
 
-component d_ff is
+component register_1 is
 	port(
-		CLK : in std_logic;
-		D : in std_logic;
-		Q : out std_logic
+		CLK_IN : in std_logic;
+		DATA_IN : in std_logic;
+		DATA_OUT : out std_logic
 	);
 end component;
 
 begin
-	DFF1 : d_ff port map(CLK => CLK_IN, D => DATA_IN(0), Q => DATA_OUT(0));
-	DFF2 : d_ff port map(CLK => CLK_IN, D => DATA_IN(1), Q => DATA_OUT(1));
-	DFF3 : d_ff port map(CLK => CLK_IN, D => DATA_IN(2), Q => DATA_OUT(2));
-	DFF4 : d_ff port map(CLK => CLK_IN, D => DATA_IN(3), Q => DATA_OUT(3));
+	DFF1 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(0), DATA_OUT => DATA_OUT(0));
+	DFF2 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(1), DATA_OUT => DATA_OUT(1));
+	DFF3 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(2), DATA_OUT => DATA_OUT(2));
+	DFF4 : register_1 port map(CLK_IN => CLK_IN, DATA_IN => DATA_IN(3), DATA_OUT => DATA_OUT(3));
 end RTL;
