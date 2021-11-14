@@ -61,27 +61,37 @@ component or_4bit_to_1bit is
 	DATA_OUT : out std_logic
 	);
 end component;
-
 	signal OP_IS_ADD_SUB_FLAG : std_logic;
 	signal OP_IS_LD_FLAG : std_logic;
 	signal OP_IS_LAD_FLAG : std_logic;
 	signal OP_IS_LD_LAD_FLAG : std_logic;
 	signal OP_IS_CP_FLAG : std_logic;
+	signal OP_IS_JP_FLAG : std_logic;
+	
+	signal OP_IS_JMI : std_logic;
+	signal OP_IS_JNZ : std_logic;
+	signal OP_IS_JZE : std_logic;
+	signal OP_IS_JUMP : std_logic;
+	signal OP_IS_JPL : std_logic;
+	signal OP_IS_JOV : std_logic;
+	
+	signal USE_JP_FLAG: std_logic;
 
 	signal WORD_LENGTH_2_FLAG : std_logic;
 
 	signal WORDS_COUNT_TO_ADD : std_logic_vector(15 downto 0);
 	signal PR_WORD_ADDED : std_logic_vector(15 downto 0);
-
+	signal NEXT_PR_OR_JP_ADDR : std_logic_vector(15 downto 0);
 begin
 	OP_IS_LD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and 
 		((not SUB_OP(3) and not SUB_OP(2) and not SUB_OP(1) and not SUB_OP(0)) or (not SUB_OP(3) and SUB_OP(2) and not SUB_OP(1) and not SUB_OP(0)));
 	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
 	OP_IS_LD_LAD_FLAG <= OP_IS_LD_FLAG OR OP_IS_LAD_FLAG;
 	OP_IS_ADD_SUB_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0));
-	OP_IS_CP_FLAG <= not MAIN_OP(3) and MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0);
+	OP_IS_CP_FLAG <= not MAIN_OP(3) and MAIN_OP(2) and not MAIN_OP(1) and not MAIN_OP(0);
+	OP_IS_JP_FLAG <= not MAIN_OP(3) and MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0);
 	
-	WORD_LENGTH_2_FLAG <= (OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG) AND (not SUB_OP(3) and not SUB_OP(2)); -- 0,1,2,3が2語命令
+	WORD_LENGTH_2_FLAG <= OP_IS_JP_FLAG OR ((OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG OR OP_IS_CP_FLAG) AND (not SUB_OP(3) and not SUB_OP(2))); -- 0,1,2,3が2語命令
 	
 	WRITE_FR_FLAG <= OP_IS_LD_FLAG OR OP_IS_ADD_SUB_FLAG OR OP_IS_CP_FLAG;
 	
@@ -92,16 +102,36 @@ begin
 		DATA_IN_2 => "0000000000000010", 
 		DATA_OUT => WORDS_COUNT_TO_ADD
 	);
-	-- ここで足すか結果を切り替える
 	PR_ADDER : adder_16bit port map( CI => '0', AIN => CURRENT_PR, BIN => WORDS_COUNT_TO_ADD, SUM(15 downto 0) => PR_WORD_ADDED);	
 	
 	-- このへんはWBの立ち上がりで使うものなのでレジスタで覚えない
 	WRITE_GR_FLAG <= OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;
-	WRITE_PR_FLAG <= RESET_IN OR OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;	
+	WRITE_PR_FLAG <= RESET_IN OR OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG OR OP_IS_CP_FLAG OR WORD_LENGTH_2_FLAG;
+	
+	OP_IS_JMI <= not SUB_OP(3) and not SUB_OP(2) and not SUB_OP(1) and SUB_OP(0);
+	OP_IS_JNZ <= not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0);
+	OP_IS_JZE <= not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and SUB_OP(0);
+	OP_IS_JUMP <= not SUB_OP(3) and SUB_OP(2) and not SUB_OP(1) and not SUB_OP(0);
+	OP_IS_JPL <= not SUB_OP(3) and SUB_OP(2) and not SUB_OP(1) and SUB_OP(0);
+	OP_IS_JOV <= not SUB_OP(3) and SUB_OP(2) and SUB_OP(1) and not SUB_OP(0);
+	
+	USE_JP_FLAG <= (OP_IS_JMI and CURRENT_PR(1))
+		or (OP_IS_JNZ and not CURRENT_PR(2))
+		or (OP_IS_JZE and CURRENT_PR(2))
+		or OP_IS_JUMP
+		or (OP_IS_JPL and not CURRENT_PR(1) and not CURRENT_PR(2))
+		or (OP_IS_JOV and CURRENT_PR(0));
+	
+	NEXT_OR_JP_MUX : multiplexer_16bit_2ways port map(
+		SELECTOR => OP_IS_JP_FLAG and USE_JP_FLAG, 
+		DATA_IN_1 => PR_WORD_ADDED, 
+		DATA_IN_2 => EFFECTIVE_ADDR, 
+		DATA_OUT => NEXT_PR_OR_JP_ADDR
+	);
 	
 	-- execにうつしてもいいかも
 	NEXT_PR_MX : multiplexer_16bit_2ways port map( SELECTOR => RESET_IN, 
-	DATA_IN_1 => PR_WORD_ADDED, 
+	DATA_IN_1 => NEXT_PR_OR_JP_ADDR, 
 	DATA_IN_2 => "0000000000000000", -- reset
 	DATA_OUT => NEXT_PR );
 end RTL;

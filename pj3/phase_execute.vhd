@@ -80,7 +80,7 @@ begin
 	-- 算術の場合
 	OP_IS_ADD_SUB_FLAG <= not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0);
 	OP_IS_SUB_FLAG <= OP_IS_ADD_SUB_FLAG AND SUB_OP(0);
-	OP_IS_CP_FLAG <= not MAIN_OP(3) and MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0);
+	OP_IS_CP_FLAG <= not MAIN_OP(3) and MAIN_OP(2) and not MAIN_OP(1) and not MAIN_OP(0);
 	
 	USE_RAM_ADDR_AS_DATA_FLAG <= OP_IS_LAD_FLAG;
 	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG OR OP_IS_LD1_FLAG;
