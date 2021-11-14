@@ -57,13 +57,15 @@ signal GRB_OR_RAM : std_logic_vector(15 downto 0);
 
 signal INTERNAL_ALU_DATA : std_logic_vector(15 downto 0);
 
-signal OP_IS_LAD_FLAG : std_logic; -- これ切り出すか？
+signal OP_IS_LAD_FLAG : std_logic;
+signal OP_IS_LD1_FLAG : std_logic;
 
 begin
 	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
-
+	OP_IS_LD1_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (SUB_OP(3) and not SUB_OP(2) and not SUB_OP(1) and not SUB_OP(0));
+	
 	USE_RAM_ADDR_AS_DATA_FLAG <= OP_IS_LAD_FLAG;
-	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG;
+	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG OR OP_IS_LD1_FLAG;
 	USE_RAM_AS_GRB_FLAG <= OP_IS_LAD_FLAG;
 	
 	RAM_MX : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_ADDR_AS_DATA_FLAG, 
@@ -81,9 +83,7 @@ begin
 	DATA_IN_1 => GRB_DATA, 
 	DATA_IN_2 => EFFECTIVE_ADDR_OR_RAM_OUT, 
 	DATA_OUT => GRB_OR_RAM);
-			
-	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG;
-	
+				
 	ALU_INSTANCE : alu port map(MAIN_OP => MAIN_OP, 
 	SUB_OP => SUB_OP, 
 	DATA_IN_A => GRA_OR_ZERO, 
