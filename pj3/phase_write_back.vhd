@@ -52,9 +52,19 @@ component adder_16bit is
 		SUM : out std_logic_vector(16 downto 0)
 	);
 end component;
+
+component or_4bit_to_1bit is
+	port( 
+	DATA_IN : in std_logic_vector(3 downto 0); 
+	DATA_OUT : out std_logic
+	);
+end component;
+
 	signal OP_IS_ADD_SUB_FLAG : std_logic;
 	signal OP_IS_LD_LAD_FLAG : std_logic;
+	signal WORD_LENGTH_2_FLAG : std_logic;
 
+	signal WORDS_COUNT_TO_ADD : std_logic_vector(15 downto 0);
 	signal PR_WORD_ADDED : std_logic_vector(15 downto 0);
 
 	signal INTERNAL_NEXT_PR : std_logic_vector(15 downto 0);
@@ -63,12 +73,20 @@ end component;
 begin
 	OP_IS_LD_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and not SUB_OP(0); -- STだけ除く
 	OP_IS_ADD_SUB_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0));
+	WORD_LENGTH_2_FLAG <= (OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG) AND (not SUB_OP(3) and not SUB_OP(2)); -- 0,1,2,3が2語命令
 
+	-- 1語命令か2語命令か判定
+	WORD_COUNT_MUX : multiplexer_16bit_2ways port map(
+		SELECTOR => WORD_LENGTH_2_FLAG, 
+		DATA_IN_1 => "0000000000000001", 
+		DATA_IN_2 => "0000000000000010", 
+		DATA_OUT => WORDS_COUNT_TO_ADD
+	);
+	-- ここで足すか結果を切り替える
+	PR_ADDER : adder_16bit port map( CI => '0', AIN => CURRENT_PR, BIN => WORDS_COUNT_TO_ADD, SUM(15 downto 0) => PR_WORD_ADDED);	
+	
 	INTERNAL_WRITE_GR_FLAG <= OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;
 	INTERNAL_WRITE_PR_FLAG <= RESET_IN OR OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;	
-
-	-- ここで結果を切り替える
-	PR_ADDER : adder_16bit port map( CI => '0', AIN => CURRENT_PR, BIN => "0000000000000010", SUM(15 downto 0) => PR_WORD_ADDED);	
 	
 	NEXT_PR_MX : multiplexer_16bit_2ways port map( SELECTOR => RESET_IN, 
 	DATA_IN_1 => PR_WORD_ADDED, 
