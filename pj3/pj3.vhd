@@ -75,13 +75,6 @@ component adder_16bit is
 	);
 end component;
 
-component not_16bit is
-	port( 
-	DATA_IN : in std_logic_vector(15 downto 0); 
-	DATA_OUT : out std_logic_vector(15 downto 0)
-	);
-end component;
-
 component multiplexer_16bit_2ways is
 	port(
 		SELECTOR : in std_logic;
@@ -103,6 +96,17 @@ component multiplexer_16bit_8ways is
 		DATA_IN_7 : in std_logic_vector(15 downto 0);
 		DATA_IN_8 : in std_logic_vector(15 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0)
+	);
+end component;
+
+component alu is
+	port(
+		MAIN_OP : in std_logic_vector(3 downto 0);
+		SUB_OP : in std_logic_vector(3 downto 0);
+		DATA_IN_A: in std_logic_vector(15 downto 0);
+		DATA_IN_B: in std_logic_vector(15 downto 0);
+		DATA_OUT : out std_logic_vector(15 downto 0);
+		DATA_OF : out std_logic
 	);
 end component;
 
@@ -177,12 +181,6 @@ signal ALU_DATA_IN_A: std_logic_vector(15 downto 0);
 signal USE_RAM_AS_GRB_FLAG : std_logic;
 signal GRB_OR_RAM : std_logic_vector(15 downto 0);
 signal ALU_DATA_IN_B: std_logic_vector(15 downto 0);
-
-signal SET_ALU_ADDER_CI_FLAG : std_logic;
-signal DATA_B_NEGATED : std_logic_vector(15 downto 0);
-signal USE_NEGATED_DATAB_FLAG: std_logic;
-
-signal DATA_B_OR_NEGATED_DATA_B : std_logic_vector(15 downto 0);
 
 signal OP_IS_LAD_FLAG : std_logic;
 signal OP_IS_SUB1_FLAG : std_logic;
@@ -311,25 +309,12 @@ begin
 	DATA_IN_1 => GRB_OUT_REG_OUT, 
 	DATA_IN_2 => EFFECTIVE_ADDR_OR_RAM_OUT_REG_OUT, 
 	DATA_OUT => GRB_OR_RAM);
-	
-	ALU_DATA_IN_A <= GRA_OR_ZERO;
-	ALU_DATA_IN_B <= GRB_OR_RAM;
-	
-	-- 引き算
-	USE_NEGATED_DATAB_FLAG <= OP_IS_SUB1_FLAG;
-	SET_ALU_ADDER_CI_FLAG <= OP_IS_SUB1_FLAG;
-	
-	NOT_NEGATE_DATAB : not_16bit port map(DATA_IN => ALU_DATA_IN_B, DATA_OUT => DATA_B_NEGATED);
-	
-	MX_NEGATE_DATAB : multiplexer_16bit_2ways port map( SELECTOR => USE_NEGATED_DATAB_FLAG, 
-	DATA_IN_1 => ALU_DATA_IN_B, 
-	DATA_IN_2 => DATA_B_NEGATED, 
-	DATA_OUT => DATA_B_OR_NEGATED_DATA_B);
-	
-	ALU_ADDER : adder_16bit port map( CI => SET_ALU_ADDER_CI_FLAG, 
-	AIN => ALU_DATA_IN_A, 
-	BIN => DATA_B_OR_NEGATED_DATA_B, 
-	SUM(15 downto 0) => ALU_DATA); -- TODO: ここでOFとかのセット必要
+		
+	ALU_INSTANCE : alu port map(MAIN_OP => MAIN_OP, 
+	SUB_OP => SUB_OP, 
+	DATA_IN_A => GRA_OR_ZERO, 
+	DATA_IN_B => GRB_OR_RAM, 
+	DATA_OUT => ALU_DATA);
 	
 	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK_EX, DATA_IN => ALU_DATA, DATA_OUT => ALU_DATA_REG_OUT);
 

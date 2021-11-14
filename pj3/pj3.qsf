@@ -77,6 +77,9 @@ set_location_assignment PIN_99 -to SEG7B[0]
 set_location_assignment PIN_69 -to DIGITB_SELECT[2]
 set_location_assignment PIN_67 -to DIGITB_SELECT[1]
 set_location_assignment PIN_65 -to DIGITB_SELECT[0]
+set_location_assignment PIN_40 -to RESET_IN
+set_location_assignment PIN_31 -to STATE_LED1
+set_global_assignment -name VHDL_FILE alu.vhd
 set_global_assignment -name VHDL_FILE prom.vhd
 set_global_assignment -name VHDL_FILE multiplexer_1bit_2ways.vhd
 set_global_assignment -name VHDL_FILE clk_gen.vhd
@@ -102,8 +105,6 @@ set_global_assignment -name VHDL_FILE adder_16bit.vhd
 set_global_assignment -name VHDL_FILE adder_4bit_ci.vhd
 set_global_assignment -name VHDL_FILE full_adder.vhd
 set_global_assignment -name VHDL_FILE half_adder.vhd
-set_location_assignment PIN_40 -to RESET_IN
-set_location_assignment PIN_31 -to STATE_LED1
 set_global_assignment -name VHDL_FILE multiplexer_16bit_4ways.vhd
 set_global_assignment -name VHDL_FILE multiplexer_16bit_8ways.vhd
 set_global_assignment -name VHDL_FILE not_16bit.vhd
