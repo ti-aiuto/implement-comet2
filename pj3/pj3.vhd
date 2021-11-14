@@ -112,7 +112,7 @@ component alu is
 	);
 end component;
 
-component phrase_decode is
+component phase_decode is
 	port(
 		CLK : in std_logic;
 		OP1_IN : std_logic_vector(15 downto 0);
@@ -134,6 +134,20 @@ component phrase_decode is
 	);
 end component;
 
+component phase_fetch is
+	port(
+		CLK_FT1 : in std_logic;
+		CLK_FT2LOAD : in std_logic;
+		CLK_FT2 : in std_logic;
+		PR_IN : in std_logic_vector(15 downto 0);
+		PROM_DATA : in std_logic_vector(15 downto 0);
+		PROM_ADDR : out std_logic_vector(15 downto 0);
+		OP1_OUT : out std_logic_vector(15 downto 0);
+		OP2_OUT : out std_logic_vector(15 downto 0);
+		CURRENT_PR : out std_logic_vector(15 downto 0)
+	);
+end component;
+
 signal CLK_SLOW_7SEG : std_logic;
 signal CLK_SLOW : std_logic;
 
@@ -147,15 +161,14 @@ signal CLK_WB : std_logic;
 
 signal OP1_OUT : std_logic_vector(15 downto 0);
 signal OP2_OUT : std_logic_vector(15 downto 0);
-signal PROM_OUT : std_logic_vector(15 downto 0);
+signal PROM_DATA : std_logic_vector(15 downto 0);
+signal PROM_ADDR : std_logic_vector(15 downto 0);
 
 signal PR_WRITE_FLAG : std_logic;
 signal PR_WORD_ADDED : std_logic_vector(15 downto 0);
 signal NEXT_PR_IN : std_logic_vector(15 downto 0);
 signal PR_OUT : std_logic_vector(15 downto 0);
-signal PR_OUT_REG_OUT : std_logic_vector(15 downto 0);
-signal PR_OUT_PLUS1 : std_logic_vector(15 downto 0);
-signal PROM_ADDR_IN : std_logic_vector(15 downto 0);
+signal CURRENT_PR : std_logic_vector(15 downto 0);
 
 signal GR_WRITE_FLAG : std_logic;
 signal NEXT_GR_DATA : std_logic_vector(15 downto 0);
@@ -212,33 +225,31 @@ begin
 	CLK_WB => CLK_WB);
 	
 	STATE_LED1 <= CLK_FT1;
-	ROM : prom port map(P_COUNT => PROM_ADDR_IN, PROM_OUT => PROM_OUT);
+	ROM : prom port map(P_COUNT => PROM_ADDR, PROM_OUT => PROM_DATA);
 
-	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PR_OUT, DATA_OUT => PR_OUT_REG_OUT);
-	
-	PROM_ADDER : adder_16bit port map( CI => '0', 
-	AIN => PR_OUT_REG_OUT, 
-	BIN => "0000000000000001", 
-	SUM(15 downto 0) => PR_OUT_PLUS1);
-	PROM_MX : multiplexer_16bit_2ways port map( SELECTOR => CLK_FT2LOAD or CLK_FT2,
-	DATA_IN_1 => PR_OUT, 
-	DATA_IN_2 => PR_OUT_PLUS1, 
-	DATA_OUT => PROM_ADDR_IN );
-	
-	PR_ADDER : adder_16bit port map( CI => '0', AIN => PR_OUT_REG_OUT, BIN => "0000000000000010", SUM(15 downto 0) => PR_WORD_ADDED);	
-	
+	PR_ADDER : adder_16bit port map( CI => '0', AIN => CURRENT_PR, BIN => "0000000000000010", SUM(15 downto 0) => PR_WORD_ADDED);	
+	PR : register_16 port map(CLK_IN => CLK_WB and PR_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
+
 	NEXT_PR_MX : multiplexer_16bit_2ways port map( SELECTOR => RESET_IN, 
 	DATA_IN_1 => PR_WORD_ADDED, 
 	DATA_IN_2 => "0000000000000000", 
 	DATA_OUT => NEXT_PR_IN );
 	
 	PR_WRITE_FLAG <= '1';	
+
+	PHASE_FETCH_COMPONENT : phase_fetch port map(
+		CLK_FT1 => CLK_FT1, 
+		CLK_FT2LOAD => CLK_FT2LOAD, 
+		CLK_FT2 => CLK_FT2, 
+		PR_IN => PR_OUT, 
+		PROM_DATA => PROM_DATA, 
+		PROM_ADDR => PROM_ADDR, 
+		OP1_OUT => OP1_OUT, 
+		OP2_OUT => OP2_OUT, 
+		CURRENT_PR => CURRENT_PR
+	);
 	
-	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PROM_OUT, DATA_OUT => OP1_OUT);
-	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, DATA_IN => PROM_OUT, DATA_OUT => OP2_OUT);
-	PR : register_16 port map(CLK_IN => CLK_WB and PR_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
-	
-	PHRASE_DECODE_INSTANCE : phrase_decode port map(
+	PHASE_DECODE_INSTANCE : phase_decode port map(
 		CLK => CLK_DC, 
 		OP1_IN => OP1_OUT,
 		OP2_IN => OP2_OUT,

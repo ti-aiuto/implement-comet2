@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity phrase_decode is
+entity phase_decode is
 	port(
 		CLK : in std_logic;
 		OP1_IN : std_logic_vector(15 downto 0);
@@ -21,9 +21,9 @@ entity phrase_decode is
 		SUB_OP : out std_logic_vector(3 downto 0);
 		EFFECTIVE_ADDR : out std_logic_vector(15 downto 0)
 	);
-end phrase_decode;
+end phase_decode;
 
-architecture RTL of phrase_decode is
+architecture RTL of phase_decode is
 	component register_4 is
 		port(
 			CLK_IN : in std_logic;
