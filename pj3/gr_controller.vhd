@@ -23,6 +23,7 @@ architecture RTL of gr_controller is
 component register_16 is
 	port(
 		CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
 		DATA_IN : in std_logic_vector(15 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0)
 	);
@@ -47,12 +48,12 @@ begin
 	GRA6_SELECTED <= GR_WRITE_SELECT(2) and GR_WRITE_SELECT(1) and not GR_WRITE_SELECT(0);
 	GRA7_SELECTED <= GR_WRITE_SELECT(2) and GR_WRITE_SELECT(1) and GR_WRITE_SELECT(0);
 	
-	GR0 : register_16 port map(CLK_IN => CLK and GR_WRITE_FLAG and GRA0_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR0_OUT);
-	GR1 : register_16 port map(CLK_IN => CLK and GR_WRITE_FLAG and GRA1_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR1_OUT);
-	GR2 : register_16 port map(CLK_IN => CLK and GR_WRITE_FLAG and GRA2_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR2_OUT);
-	GR3 : register_16 port map(CLK_IN => CLK and GR_WRITE_FLAG and GRA3_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR3_OUT);
-	GR4 : register_16 port map(CLK_IN => CLK and GR_WRITE_FLAG and GRA4_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR4_OUT);
-	GR5 : register_16 port map(CLK_IN => CLK and GR_WRITE_FLAG and GRA5_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR5_OUT);
-	GR6 : register_16 port map(CLK_IN => CLK and GR_WRITE_FLAG and GRA6_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR6_OUT);
-	GR7 : register_16 port map(CLK_IN => CLK and GR_WRITE_FLAG and GRA7_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR7_OUT);
+	GR0 : register_16 port map(CLK_IN => CLK, WRITE_FLAG => GR_WRITE_FLAG and GRA0_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR0_OUT);
+	GR1 : register_16 port map(CLK_IN => CLK, WRITE_FLAG => GR_WRITE_FLAG and GRA1_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR1_OUT);
+	GR2 : register_16 port map(CLK_IN => CLK, WRITE_FLAG => GR_WRITE_FLAG and GRA2_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR2_OUT);
+	GR3 : register_16 port map(CLK_IN => CLK, WRITE_FLAG => GR_WRITE_FLAG and GRA3_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR3_OUT);
+	GR4 : register_16 port map(CLK_IN => CLK, WRITE_FLAG => GR_WRITE_FLAG and GRA4_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR4_OUT);
+	GR5 : register_16 port map(CLK_IN => CLK, WRITE_FLAG => GR_WRITE_FLAG and GRA5_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR5_OUT);
+	GR6 : register_16 port map(CLK_IN => CLK, WRITE_FLAG => GR_WRITE_FLAG and GRA6_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR6_OUT);
+	GR7 : register_16 port map(CLK_IN => CLK, WRITE_FLAG => GR_WRITE_FLAG and GRA7_SELECTED, DATA_IN => GR_WRITE_DATA, DATA_OUT => GR7_OUT);
 end RTL;

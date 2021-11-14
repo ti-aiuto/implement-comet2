@@ -27,6 +27,7 @@ architecture RTL of phase_decode is
 	component register_4 is
 		port(
 			CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
 			DATA_IN : in std_logic_vector(3 downto 0);
 			DATA_OUT : out std_logic_vector(3 downto 0)
 		);
@@ -35,6 +36,7 @@ architecture RTL of phase_decode is
 	component register_16 is
 	port(
 		CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
 		DATA_IN : in std_logic_vector(15 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0)
 	);
@@ -106,14 +108,14 @@ begin
 	INTERNAL_GRA_SELECT <= OP1_IN(6 downto 4);
 	INTERNAL_GRB_SELECT <= OP1_IN(2 downto 0);
 	
-	GRA_SELECT_REGISTER : register_4 port map(CLK_IN => CLK, DATA_IN => "0" & INTERNAL_GRA_SELECT, DATA_OUT(2 downto 0) => GRA_SELECT);
+	GRA_SELECT_REGISTER : register_4 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => "0" & INTERNAL_GRA_SELECT, DATA_OUT(2 downto 0) => GRA_SELECT);
 	
-	GRA_REGISTER : register_16 port map(CLK_IN => CLK, DATA_IN => INTERNAL_GRA_OUT, DATA_OUT => GRA_OUT);
-	GRB_REGISTER : register_16 port map(CLK_IN => CLK, DATA_IN => INTERNAL_GRB_OUT, DATA_OUT => GRB_OUT);
+	GRA_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_GRA_OUT, DATA_OUT => GRA_OUT);
+	GRB_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_GRB_OUT, DATA_OUT => GRB_OUT);
 
 	OP2_PLUS_GRB_ADDER : adder_16bit port map( CI => '0', AIN => OP2_IN, BIN => INTERNAL_GRB_OUT, SUM(15 downto 0) => OP2_PLUS_GRB );
-	OP2_PLUS_GRB_REGISTER : register_16 port map(CLK_IN => CLK, DATA_IN => OP2_PLUS_GRB, DATA_OUT => EFFECTIVE_ADDR);
+	OP2_PLUS_GRB_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => OP2_PLUS_GRB, DATA_OUT => EFFECTIVE_ADDR);
 	
-	MAIN_OP_REGISTER : register_4 port map(CLK_IN => CLK, DATA_IN => INTERNAL_MAIN_OP, DATA_OUT => MAIN_OP);
-	SUB_OP_REGISTER : register_4 port map(CLK_IN => CLK, DATA_IN => INTERNAL_SUB_OP, DATA_OUT => SUB_OP);
+	MAIN_OP_REGISTER : register_4 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_MAIN_OP, DATA_OUT => MAIN_OP);
+	SUB_OP_REGISTER : register_4 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_SUB_OP, DATA_OUT => SUB_OP);
 end RTL;

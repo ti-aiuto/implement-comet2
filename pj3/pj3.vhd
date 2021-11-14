@@ -54,6 +54,7 @@ end component;
 component register_16 is
 	port(
 		CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
 		DATA_IN : in std_logic_vector(15 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0)
 	);
@@ -208,7 +209,7 @@ begin
 	STATE_LED1 <= CLK_FT1;
 	ROM : prom port map(P_COUNT => PROM_ADDR, PROM_OUT => PROM_DATA);
 
-	PR : register_16 port map(CLK_IN => CLK_WB and WRITE_PR_FLAG, DATA_IN => NEXT_PR, DATA_OUT => PR_OUT);
+	PR : register_16 port map(CLK_IN => CLK_WB, WRITE_FLAG => WRITE_PR_FLAG, DATA_IN => NEXT_PR, DATA_OUT => PR_OUT);
 
 	-- ここにRAMに入れる実装もいる	
 	GR_CONTROLLER_INSTANCE : gr_controller port map( CLK => CLK_WB, 
@@ -257,6 +258,7 @@ begin
 	);
 	
 	RAM_DATA_REGISTER : register_16 port map( CLK_IN => CLK_MA, 
+	WRITE_FLAG => '1', 
 	DATA_IN => "0000000000000000", -- ここにRAMからもってくる実装を入れる 
 	DATA_OUT => RAM_DATA);
 

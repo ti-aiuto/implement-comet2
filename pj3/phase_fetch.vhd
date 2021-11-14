@@ -19,6 +19,7 @@ architecture RTL of phase_fetch is
 	component register_16 is
 		port(
 			CLK_IN : in std_logic;
+			WRITE_FLAG : in std_logic;
 			DATA_IN : in std_logic_vector(15 downto 0);
 			DATA_OUT : out std_logic_vector(15 downto 0)
 		);
@@ -55,8 +56,8 @@ begin
 	DATA_IN_2 => INTERNAL_PR_OUT_PLUS1, 
 	DATA_OUT => PROM_ADDR );
 	
-	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PROM_DATA, DATA_OUT => OP1_OUT);
-	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, DATA_IN => PROM_DATA, DATA_OUT => OP2_OUT);
+	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PROM_DATA, DATA_OUT => OP1_OUT);
+	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, WRITE_FLAG => '1', DATA_IN => PROM_DATA, DATA_OUT => OP2_OUT);
 
-	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PR_IN, DATA_OUT => CURRENT_PR);
+	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PR_IN, DATA_OUT => CURRENT_PR);
 end RTL;

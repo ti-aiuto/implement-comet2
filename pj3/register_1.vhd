@@ -5,6 +5,7 @@ use IEEE.std_logic_unsigned.all;
 entity register_1 is
 	port(
 		CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
 		DATA_IN : in std_logic;
 		DATA_OUT : out std_logic
 	);
@@ -21,5 +22,5 @@ component d_ff is
 end component;
 
 begin
-	DFF1 : d_ff port map(CLK => CLK_IN, D => DATA_IN, Q => DATA_OUT);
+	DFF1 : d_ff port map(CLK => CLK_IN and WRITE_FLAG, D => DATA_IN, Q => DATA_OUT);
 end RTL;

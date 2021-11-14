@@ -20,6 +20,7 @@ architecture RTL of phase_write_back is
 component register_1 is
 	port(
 		CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
 		DATA_IN : in std_logic;
 		DATA_OUT : out std_logic
 	);
@@ -28,6 +29,7 @@ end component;
 component register_16 is
 	port(
 		CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
 		DATA_IN : in std_logic_vector(15 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0)
 	);
@@ -70,7 +72,7 @@ begin
 	DATA_IN_2 => "0000000000000000", -- reset
 	DATA_OUT => INTERNAL_NEXT_PR );
 	
-	GR_REGISTER : register_1 port map(CLK_IN => CLK, DATA_IN => INTERNAL_WRITE_GR_FLAG, DATA_OUT => WRITE_GR_FLAG);
-	PR_REGISTER : register_1 port map(CLK_IN => CLK, DATA_IN => INTERNAL_WRITE_PR_FLAG, DATA_OUT => WRITE_PR_FLAG);
-	NEXT_PR_REGISTER : register_16 port map(CLK_IN => CLK, DATA_IN => INTERNAL_NEXT_PR, DATA_OUT => NEXT_PR);
+	GR_REGISTER : register_1 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_WRITE_GR_FLAG, DATA_OUT => WRITE_GR_FLAG);
+	PR_REGISTER : register_1 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_WRITE_PR_FLAG, DATA_OUT => WRITE_PR_FLAG);
+	NEXT_PR_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_NEXT_PR, DATA_OUT => NEXT_PR);
 end RTL;

@@ -40,6 +40,7 @@ end component;
 component register_16 is
 	port(
 		CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
 		DATA_IN : in std_logic_vector(15 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0)
 	);
@@ -89,5 +90,5 @@ begin
 	DATA_IN_B => GRB_OR_RAM, 
 	DATA_OUT => INTERNAL_ALU_DATA);
 
-	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK, DATA_IN => INTERNAL_ALU_DATA, DATA_OUT => DATA_OUT);
+	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_ALU_DATA, DATA_OUT => DATA_OUT);
 end RTL;
