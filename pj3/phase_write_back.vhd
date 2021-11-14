@@ -115,12 +115,12 @@ begin
 	OP_IS_JPL <= not SUB_OP(3) and SUB_OP(2) and not SUB_OP(1) and SUB_OP(0);
 	OP_IS_JOV <= not SUB_OP(3) and SUB_OP(2) and SUB_OP(1) and not SUB_OP(0);
 	
-	USE_JP_FLAG <= (OP_IS_JMI and CURRENT_PR(1))
-		or (OP_IS_JNZ and not CURRENT_PR(2))
-		or (OP_IS_JZE and CURRENT_PR(2))
+	USE_JP_FLAG <= (OP_IS_JMI and CURRENT_FR(1))
+		or (OP_IS_JNZ and not CURRENT_FR(2))
+		or (OP_IS_JZE and CURRENT_FR(2))
 		or OP_IS_JUMP
-		or (OP_IS_JPL and not CURRENT_PR(1) and not CURRENT_PR(2))
-		or (OP_IS_JOV and CURRENT_PR(0));
+		or (OP_IS_JPL and not CURRENT_FR(1) and not CURRENT_FR(2))
+		or (OP_IS_JOV and CURRENT_FR(0));
 	
 	NEXT_OR_JP_MUX : multiplexer_16bit_2ways port map(
 		SELECTOR => OP_IS_JP_FLAG and USE_JP_FLAG, 
