@@ -207,7 +207,8 @@ begin
 	CLK_WB => CLK_WB);
 	
 	STATE_LED1 <= CLK_FT1;
-	
+	ROM : prom port map(P_COUNT => PROM_ADDR_IN, PROM_OUT => PROM_OUT);
+
 	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, DATA_IN => PR_OUT, DATA_OUT => PR_OUT_REG_OUT);
 	
 	PROM_ADDER : adder_16bit port map( CI => '0', 
@@ -324,9 +325,7 @@ begin
 
 	NEXT_GR_DATA <= ALU_DATA_REG_OUT;
 	-- ここにRAMに入れる実装もいる
-	
-	ROM : prom port map(P_COUNT => PROM_ADDR_IN, PROM_OUT => PROM_OUT);
-	
+		
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
 	BIN_IN => GR1_OUT, 
 	SEG7 => SEG7A, 
