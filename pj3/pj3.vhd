@@ -66,24 +66,6 @@ component prom is
 	);
 end component;
 
-component adder_16bit is
-	port(
-		CI : in std_logic;
-		AIN : in std_logic_vector(15 downto 0);
-		BIN : in std_logic_vector(15 downto 0);
-		SUM : out std_logic_vector(16 downto 0)
-	);
-end component;
-
-component multiplexer_16bit_2ways is
-	port(
-		SELECTOR : in std_logic;
-		DATA_IN_1 : in std_logic_vector(15 downto 0);
-		DATA_IN_2 : in std_logic_vector(15 downto 0);
-		DATA_OUT : out std_logic_vector(15 downto 0)
-	);
-end component;
-
 component gr_controller is
 	port(
 		CLK : in std_logic;
@@ -151,6 +133,20 @@ component phase_execute is
 	);
 end component;
 
+component phase_write_back is
+	port(
+		CLK : in std_logic;
+		RESET_IN : in std_logic;
+		MAIN_OP : in std_logic_vector(3 downto 0);
+		SUB_OP : in std_logic_vector(3 downto 0);
+		CURRENT_PR : in std_logic_vector(15 downto 0);
+		EFFECTIVE_ADDR : in std_logic_vector(15 downto 0);
+		NEXT_PR : out std_logic_vector(15 downto 0);
+		WRITE_GR_FLAG : out std_logic;
+		WRITE_PR_FLAG : out std_logic
+	);
+end component;
+
 signal CLK_SLOW_7SEG : std_logic;
 signal CLK_SLOW : std_logic;
 
@@ -192,13 +188,9 @@ signal RAM_DATA : std_logic_vector(15 downto 0);
 
 signal ALU_DATA : std_logic_vector(15 downto 0);
 
-signal PR_WRITE_FLAG : std_logic;
-signal NEXT_PR_IN : std_logic_vector(15 downto 0);
-signal GR_WRITE_FLAG : std_logic;
-signal NEXT_GR_DATA : std_logic_vector(15 downto 0);
-signal PR_WORD_ADDED : std_logic_vector(15 downto 0); -- けせる
-
-signal OP_IS_LAD_FLAG : std_logic;
+signal NEXT_PR : std_logic_vector(15 downto 0);
+signal WRITE_PR_FLAG : std_logic;
+signal WRITE_GR_FLAG : std_logic;
 
 begin
 	CLOCK_7SEG_COMPONENT : clock_down_dynamyc_7seg port map(CLK_IN => CLK_IN, CLK_OUT => CLK_SLOW_7SEG);
@@ -216,13 +208,13 @@ begin
 	STATE_LED1 <= CLK_FT1;
 	ROM : prom port map(P_COUNT => PROM_ADDR, PROM_OUT => PROM_DATA);
 
-	PR_ADDER : adder_16bit port map( CI => '0', AIN => CURRENT_PR, BIN => "0000000000000010", SUM(15 downto 0) => PR_WORD_ADDED);	
-	PR : register_16 port map(CLK_IN => CLK_WB and PR_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
-	
+	PR : register_16 port map(CLK_IN => CLK_WB and WRITE_PR_FLAG, DATA_IN => NEXT_PR, DATA_OUT => PR_OUT);
+
+	-- ここにRAMに入れる実装もいる	
 	GR_CONTROLLER_INSTANCE : gr_controller port map( CLK => CLK_WB, 
-	GR_WRITE_FLAG => GR_WRITE_FLAG, 
+	GR_WRITE_FLAG => WRITE_GR_FLAG, 
 	GR_WRITE_SELECT => GRA_SELECT, 
-	GR_WRITE_DATA => NEXT_GR_DATA, 
+	GR_WRITE_DATA => ALU_DATA, 
 	GR0_OUT => GR0_OUT, 
 	GR1_OUT => GR1_OUT, 
 	GR2_OUT => GR2_OUT, 
@@ -281,21 +273,17 @@ begin
 		-- OF_OUT : out std_logic
 	);
 	
-	-- 仮実装
-	GR_WRITE_FLAG <= '1';
-	
-	-- ここにどの命令か判定するフラグを作っていく
-	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
-	
-	NEXT_GR_DATA <= ALU_DATA;
-	NEXT_PR_MX : multiplexer_16bit_2ways port map( SELECTOR => RESET_IN, 
-	DATA_IN_1 => PR_WORD_ADDED, 
-	DATA_IN_2 => "0000000000000000", -- reset
-	DATA_OUT => NEXT_PR_IN );
-	
-	PR_WRITE_FLAG <= '1';	
-
-	-- ここにRAMに入れる実装もいる
+	PHASE_WRITE_BACK_INSTANCE : phase_write_back port map(
+		CLK => CLK_WB,
+		RESET_IN => RESET_IN, 
+		MAIN_OP => MAIN_OP,
+		SUB_OP => SUB_OP,
+		CURRENT_PR => CURRENT_PR,
+		EFFECTIVE_ADDR => EFFECTIVE_ADDR,
+		NEXT_PR => NEXT_PR, 
+		WRITE_GR_FLAG => WRITE_GR_FLAG,
+		WRITE_PR_FLAG => WRITE_PR_FLAG
+	);
 		
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
 	BIN_IN => GR1_OUT, 
