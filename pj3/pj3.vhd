@@ -192,8 +192,6 @@ signal GRA_SELECT : std_logic_vector(2 downto 0);
 signal GRB_SELECT : std_logic_vector(2 downto 0);
 signal GRA_OUT : std_logic_vector(15 downto 0);
 signal GRB_OUT : std_logic_vector(15 downto 0);
-signal GRA_OUT_REG_OUT : std_logic_vector(15 downto 0);
-signal GRB_OUT_REG_OUT : std_logic_vector(15 downto 0);
 
 signal EFFECTIVE_ADDR : std_logic_vector(15 downto 0);
 signal RAM_DATA : std_logic_vector(15 downto 0);
