@@ -60,6 +60,15 @@ component register_16 is
 	);
 end component;
 
+component register_4 is
+	port(
+		CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
+		DATA_IN : in std_logic_vector(3 downto 0);
+		DATA_OUT : out std_logic_vector(3 downto 0)
+	);
+end component;
+
 component prom is
 	port(
 		P_COUNT : in std_logic_vector(15 downto 0);
@@ -141,10 +150,12 @@ component phase_write_back is
 		MAIN_OP : in std_logic_vector(3 downto 0);
 		SUB_OP : in std_logic_vector(3 downto 0);
 		CURRENT_PR : in std_logic_vector(15 downto 0);
+		CURRENT_FR : in std_logic_vector(2 downto 0);
 		EFFECTIVE_ADDR : in std_logic_vector(15 downto 0);
 		NEXT_PR : out std_logic_vector(15 downto 0);
 		WRITE_GR_FLAG : out std_logic;
-		WRITE_PR_FLAG : out std_logic
+		WRITE_PR_FLAG : out std_logic; 
+		WRITE_FR_FLAG : out std_logic
 	);
 end component;
 
@@ -166,6 +177,7 @@ signal PROM_ADDR : std_logic_vector(15 downto 0);
 
 signal PR_OUT : std_logic_vector(15 downto 0);
 signal CURRENT_PR : std_logic_vector(15 downto 0);
+signal CURRENT_FR : std_logic_vector(2 downto 0);
 
 signal GR0_OUT : std_logic_vector(15 downto 0);
 signal GR1_OUT : std_logic_vector(15 downto 0);
@@ -188,8 +200,11 @@ signal EFFECTIVE_ADDR : std_logic_vector(15 downto 0);
 signal RAM_DATA : std_logic_vector(15 downto 0);
 
 signal ALU_DATA : std_logic_vector(15 downto 0);
+signal ALU_FR : std_logic_vector(2 downto 0);
 
 signal NEXT_PR : std_logic_vector(15 downto 0);
+signal NEXT_FR : std_logic_vector(2 downto 0);
+signal WRITE_FR_FLAG : std_logic;
 signal WRITE_PR_FLAG : std_logic;
 signal WRITE_GR_FLAG : std_logic;
 
@@ -210,7 +225,8 @@ begin
 	ROM : prom port map(P_COUNT => PROM_ADDR, PROM_OUT => PROM_DATA);
 
 	PR : register_16 port map(CLK_IN => CLK_WB, WRITE_FLAG => WRITE_PR_FLAG, DATA_IN => NEXT_PR, DATA_OUT => PR_OUT);
-
+	FR : register_4 port map(CLK_IN => CLK_WB, WRITE_FLAG => WRITE_FR_FLAG, DATA_IN => "0" & ALU_FR, DATA_OUT(2 downto 0) => CURRENT_FR);
+	
 	-- ここにRAMに入れる実装もいる	
 	GR_CONTROLLER_INSTANCE : gr_controller port map( CLK => CLK_WB, 
 	GR_WRITE_FLAG => WRITE_GR_FLAG, 
@@ -271,8 +287,8 @@ begin
 		GRB_DATA => GRB_OUT,
 		MAIN_OP => MAIN_OP,
 		SUB_OP => SUB_OP,
-		DATA_OUT => ALU_DATA
-		-- OF_OUT : out std_logic
+		DATA_OUT => ALU_DATA,
+		FR_OUT => ALU_FR
 	);
 	
 	PHASE_WRITE_BACK_INSTANCE : phase_write_back port map(
@@ -281,10 +297,12 @@ begin
 		MAIN_OP => MAIN_OP,
 		SUB_OP => SUB_OP,
 		CURRENT_PR => CURRENT_PR,
+		CURRENT_FR => CURRENT_FR,
 		EFFECTIVE_ADDR => EFFECTIVE_ADDR,
 		NEXT_PR => NEXT_PR, 
 		WRITE_GR_FLAG => WRITE_GR_FLAG,
-		WRITE_PR_FLAG => WRITE_PR_FLAG
+		WRITE_PR_FLAG => WRITE_PR_FLAG, 
+		WRITE_FR_FLAG => WRITE_FR_FLAG
 	);
 		
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
@@ -293,7 +311,7 @@ begin
 	DIGIT_SELECT => DIGITA_SELECT);
 
 	DEC2: bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
-	BIN_IN => GR2_OUT, 
+	BIN_IN => "0000000000000" & CURRENT_FR, 
 	SEG7 => SEG7B, 
 	DIGIT_SELECT => DIGITB_SELECT);
 end RTL;

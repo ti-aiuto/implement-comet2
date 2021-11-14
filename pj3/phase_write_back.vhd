@@ -8,10 +8,12 @@ entity phase_write_back is
 		MAIN_OP : in std_logic_vector(3 downto 0);
 		SUB_OP : in std_logic_vector(3 downto 0);
 		CURRENT_PR : in std_logic_vector(15 downto 0);
+		CURRENT_FR : in std_logic_vector(2 downto 0);
 		EFFECTIVE_ADDR : in std_logic_vector(15 downto 0);
 		NEXT_PR : out std_logic_vector(15 downto 0);
 		WRITE_GR_FLAG : out std_logic;
-		WRITE_PR_FLAG : out std_logic
+		WRITE_PR_FLAG : out std_logic; 
+		WRITE_FR_FLAG : out std_logic
 	);
 end phase_write_back;
 
