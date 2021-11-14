@@ -52,17 +52,20 @@ component adder_16bit is
 		SUM : out std_logic_vector(16 downto 0)
 	);
 end component;
-	signal OP_IS_LAD_FLAG : std_logic;
+	signal OP_IS_ADD_SUB_FLAG : std_logic;
+	signal OP_IS_LD_LAD_FLAG : std_logic;
+
 	signal PR_WORD_ADDED : std_logic_vector(15 downto 0);
 
 	signal INTERNAL_NEXT_PR : std_logic_vector(15 downto 0);
 	signal INTERNAL_WRITE_GR_FLAG : std_logic;
 	signal INTERNAL_WRITE_PR_FLAG : std_logic;
 begin
-	INTERNAL_WRITE_GR_FLAG <= '1';
-	INTERNAL_WRITE_PR_FLAG <= '1';	
+	OP_IS_LD_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and not SUB_OP(0); -- STだけ除く
+	OP_IS_ADD_SUB_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0));
 
-	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
+	INTERNAL_WRITE_GR_FLAG <= OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;
+	INTERNAL_WRITE_PR_FLAG <= RESET_IN OR OP_IS_LD_LAD_FLAG OR OP_IS_ADD_SUB_FLAG;	
 
 	-- ここで結果を切り替える
 	PR_ADDER : adder_16bit port map( CI => '0', AIN => CURRENT_PR, BIN => "0000000000000010", SUM(15 downto 0) => PR_WORD_ADDED);	
