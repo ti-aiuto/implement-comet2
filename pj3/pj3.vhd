@@ -203,7 +203,6 @@ signal ALU_DATA : std_logic_vector(15 downto 0);
 signal ALU_FR : std_logic_vector(2 downto 0);
 
 signal NEXT_PR : std_logic_vector(15 downto 0);
-signal NEXT_FR : std_logic_vector(2 downto 0);
 signal WRITE_FR_FLAG : std_logic;
 signal WRITE_PR_FLAG : std_logic;
 signal WRITE_GR_FLAG : std_logic;

@@ -44,10 +44,11 @@ architecture RTL of phase_fetch is
 	end component;
 
 	signal INTERNAL_PR_OUT_PLUS1 : std_logic_vector(15 downto 0);
+	signal INTERNAL_CURRENT_PR : std_logic_vector(15 downto 0);
 
 begin
 	PROM_ADDER : adder_16bit port map( CI => '0', 
-	AIN => PR_IN, 
+	AIN => INTERNAL_CURRENT_PR, 
 	BIN => "0000000000000001", 
 	SUM(15 downto 0) => INTERNAL_PR_OUT_PLUS1);
 	
@@ -59,5 +60,6 @@ begin
 	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PROM_DATA, DATA_OUT => OP1_OUT);
 	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, WRITE_FLAG => '1', DATA_IN => PROM_DATA, DATA_OUT => OP2_OUT);
 
-	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PR_IN, DATA_OUT => CURRENT_PR);
+	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PR_IN, DATA_OUT => INTERNAL_CURRENT_PR);
+	CURRENT_PR <= INTERNAL_CURRENT_PR;
 end RTL;
