@@ -167,14 +167,8 @@ signal OP2_OUT : std_logic_vector(15 downto 0);
 signal PROM_DATA : std_logic_vector(15 downto 0);
 signal PROM_ADDR : std_logic_vector(15 downto 0);
 
-signal PR_WRITE_FLAG : std_logic;
-signal PR_WORD_ADDED : std_logic_vector(15 downto 0);
-signal NEXT_PR_IN : std_logic_vector(15 downto 0);
 signal PR_OUT : std_logic_vector(15 downto 0);
 signal CURRENT_PR : std_logic_vector(15 downto 0);
-
-signal GR_WRITE_FLAG : std_logic;
-signal NEXT_GR_DATA : std_logic_vector(15 downto 0);
 
 signal GR0_OUT : std_logic_vector(15 downto 0);
 signal GR1_OUT : std_logic_vector(15 downto 0);
@@ -198,6 +192,12 @@ signal RAM_DATA : std_logic_vector(15 downto 0);
 
 signal ALU_DATA : std_logic_vector(15 downto 0);
 
+signal PR_WRITE_FLAG : std_logic;
+signal NEXT_PR_IN : std_logic_vector(15 downto 0);
+signal GR_WRITE_FLAG : std_logic;
+signal NEXT_GR_DATA : std_logic_vector(15 downto 0);
+signal PR_WORD_ADDED : std_logic_vector(15 downto 0); -- けせる
+
 signal OP_IS_LAD_FLAG : std_logic;
 
 begin
@@ -218,13 +218,6 @@ begin
 
 	PR_ADDER : adder_16bit port map( CI => '0', AIN => CURRENT_PR, BIN => "0000000000000010", SUM(15 downto 0) => PR_WORD_ADDED);	
 	PR : register_16 port map(CLK_IN => CLK_WB and PR_WRITE_FLAG, DATA_IN => NEXT_PR_IN, DATA_OUT => PR_OUT);
-
-	NEXT_PR_MX : multiplexer_16bit_2ways port map( SELECTOR => RESET_IN, 
-	DATA_IN_1 => PR_WORD_ADDED, 
-	DATA_IN_2 => "0000000000000000", 
-	DATA_OUT => NEXT_PR_IN );
-	
-	PR_WRITE_FLAG <= '1';	
 	
 	GR_CONTROLLER_INSTANCE : gr_controller port map( CLK => CLK_WB, 
 	GR_WRITE_FLAG => GR_WRITE_FLAG, 
@@ -295,6 +288,13 @@ begin
 	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
 	
 	NEXT_GR_DATA <= ALU_DATA;
+	NEXT_PR_MX : multiplexer_16bit_2ways port map( SELECTOR => RESET_IN, 
+	DATA_IN_1 => PR_WORD_ADDED, 
+	DATA_IN_2 => "0000000000000000", -- reset
+	DATA_OUT => NEXT_PR_IN );
+	
+	PR_WRITE_FLAG <= '1';	
+
 	-- ここにRAMに入れる実装もいる
 		
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
