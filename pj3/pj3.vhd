@@ -225,7 +225,20 @@ begin
 	DATA_OUT => NEXT_PR_IN );
 	
 	PR_WRITE_FLAG <= '1';	
-
+	
+	GR_CONTROLLER_INSTANCE : gr_controller port map( CLK => CLK_WB, 
+	GR_WRITE_FLAG => GR_WRITE_FLAG, 
+	GR_WRITE_SELECT => GRA_SELECT, 
+	GR_WRITE_DATA => NEXT_GR_DATA, 
+	GR0_OUT => GR0_OUT, 
+	GR1_OUT => GR1_OUT, 
+	GR2_OUT => GR2_OUT, 
+	GR3_OUT => GR3_OUT, 
+	GR4_OUT => GR4_OUT, 
+	GR5_OUT => GR5_OUT, 
+	GR6_OUT => GR6_OUT, 
+	GR7_OUT => GR7_OUT);
+	
 	PHASE_FETCH_COMPONENT : phase_fetch port map(
 		CLK_FT1 => CLK_FT1, 
 		CLK_FT2LOAD => CLK_FT2LOAD, 
@@ -258,25 +271,6 @@ begin
 		EFFECTIVE_ADDR => EFFECTIVE_ADDR
 	);
 	
-	-- 仮実装
-	GR_WRITE_FLAG <= '1';
-	
-	GR_CONTROLLER_INSTANCE : gr_controller port map( CLK => CLK_WB, 
-	GR_WRITE_FLAG => GR_WRITE_FLAG, 
-	GR_WRITE_SELECT => GRA_SELECT, 
-	GR_WRITE_DATA => NEXT_GR_DATA, 
-	GR0_OUT => GR0_OUT, 
-	GR1_OUT => GR1_OUT, 
-	GR2_OUT => GR2_OUT, 
-	GR3_OUT => GR3_OUT, 
-	GR4_OUT => GR4_OUT, 
-	GR5_OUT => GR5_OUT, 
-	GR6_OUT => GR6_OUT, 
-	GR7_OUT => GR7_OUT);
-	
-	-- ここにどの命令か判定するフラグを作っていく
-	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
-	
 	RAM_DATA_REGISTER : register_16 port map( CLK_IN => CLK_MA, 
 	DATA_IN => "0000000000000000", -- ここにRAMからもってくる実装を入れる 
 	DATA_OUT => RAM_DATA);
@@ -293,6 +287,12 @@ begin
 		DATA_OUT => ALU_DATA
 		-- OF_OUT : out std_logic
 	);
+	
+	-- 仮実装
+	GR_WRITE_FLAG <= '1';
+	
+	-- ここにどの命令か判定するフラグを作っていく
+	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
 	
 	NEXT_GR_DATA <= ALU_DATA;
 	-- ここにRAMに入れる実装もいる
