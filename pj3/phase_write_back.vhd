@@ -77,6 +77,7 @@ component parse_op_as_flag is
 		OP_NEEDS_WRITE_PR_FLAG: out std_logic
 	);
 end component;
+
 	signal MAIN_OP_IS_JP_FLAG : std_logic;
 	signal OP_IS_JMI_FLAG : std_logic;
 	signal OP_IS_JNZ_FLAG : std_logic;

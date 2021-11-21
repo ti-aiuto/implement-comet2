@@ -61,6 +61,31 @@ component or_in_16bit_out_1bit is
 	);
 end component;
 
+component parse_op_as_flag is
+	port(
+		MAIN_OP : in std_logic_vector(3 downto 0);
+		SUB_OP : in std_logic_vector(3 downto 0);			
+		MAIN_OP_IS_LD_ST_LAD_FLAG : out std_logic;
+		MAIN_OP_IS_ADD_SUB_FLAG : out std_logic;
+		MAIN_OP_IS_CP_FLAG : out std_logic;
+		MAIN_OP_IS_JP_FLAG : out std_logic;
+		OP_IS_LD_FLAG : out std_logic;
+		OP_IS_LAD_FLAG : out std_logic;
+		OP_IS_JMI_FLAG : out std_logic;
+		OP_IS_JNZ_FLAG : out std_logic;
+		OP_IS_JZE_FLAG : out std_logic;
+		OP_IS_JUMP_FLAG : out std_logic;
+		OP_IS_JPL_FLAG : out std_logic;
+		OP_IS_JOV_FLAG : out std_logic;
+		OP_IS_ADD_FLAG : out std_logic;
+		OP_IS_SUB_FLAG : out std_logic;
+		OP_LENGTH_IS_TWO_FLAG: out std_logic;
+		OP_NEEDS_WRITE_GR_FLAG: out std_logic;
+		OP_NEEDS_WRITE_FR_FLAG: out std_logic;
+		OP_NEEDS_WRITE_PR_FLAG: out std_logic
+	);
+end component;
+
 signal USE_RAM_ADDR_AS_DATA_FLAG : std_logic;
 signal EFFECTIVE_ADDR_OR_RAM_OUT : std_logic_vector(15 downto 0);
 
@@ -75,23 +100,25 @@ signal INTERNAL_ALU_DATA : std_logic_vector(15 downto 0);
 signal INTERNAL_ALU_DATA_OR : std_logic;
 signal INTERNAL_FR_DATA : std_logic_vector(2 downto 0);
 
+signal MAIN_OP_IS_CP_FLAG : std_logic;
+signal OP_IS_LD_FLAG : std_logic;
 signal OP_IS_LAD_FLAG : std_logic;
-signal OP_IS_LD1_FLAG : std_logic;
-signal OP_IS_ADD_SUB_FLAG : std_logic;
+signal OP_IS_ADD_FLAG : std_logic;
 signal OP_IS_SUB_FLAG : std_logic;
-signal OP_IS_CP_FLAG : std_logic;
 
 begin
-	OP_IS_LAD_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and not SUB_OP(2) and SUB_OP(1) and not SUB_OP(0));
-	OP_IS_LD1_FLAG <= (not MAIN_OP(3) and not MAIN_OP(2) and not MAIN_OP(1) and MAIN_OP(0)) and (not SUB_OP(3) and SUB_OP(2) and not SUB_OP(1) and not SUB_OP(0));
-	
-	-- 算術の場合
-	OP_IS_ADD_SUB_FLAG <= not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0);
-	OP_IS_SUB_FLAG <= OP_IS_ADD_SUB_FLAG AND SUB_OP(0);
-	OP_IS_CP_FLAG <= not MAIN_OP(3) and MAIN_OP(2) and not MAIN_OP(1) and not MAIN_OP(0);
-	
+	PARSE_OP : parse_op_as_flag port map(
+		MAIN_OP => MAIN_OP,
+		SUB_OP => SUB_OP,
+		MAIN_OP_IS_CP_FLAG => MAIN_OP_IS_CP_FLAG,
+		OP_IS_LD_FLAG => OP_IS_LD_FLAG, 
+		OP_IS_LAD_FLAG => OP_IS_LAD_FLAG, 
+		OP_IS_ADD_FLAG => OP_IS_ADD_FLAG, 
+		OP_IS_SUB_FLAG => OP_IS_SUB_FLAG
+	);
+
 	USE_RAM_ADDR_AS_DATA_FLAG <= OP_IS_LAD_FLAG;
-	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG OR OP_IS_LD1_FLAG;
+	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG OR OP_IS_LD_FLAG;
 	USE_RAM_AS_GRB_FLAG <= OP_IS_LAD_FLAG;
 	
 	RAM_MX : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_ADDR_AS_DATA_FLAG, 
@@ -110,7 +137,7 @@ begin
 	DATA_IN_2 => EFFECTIVE_ADDR_OR_RAM_OUT, 
 	DATA_OUT => GRB_OR_RAM);
 				
-	ALU_INSTANCE : alu port map(SUB_FLAG => OP_IS_SUB_FLAG or OP_IS_CP_FLAG, -- 引き算に切り替え
+	ALU_INSTANCE : alu port map(SUB_FLAG => OP_IS_SUB_FLAG or MAIN_OP_IS_CP_FLAG, -- 引き算に切り替え
 	DATA_IN_A => GRA_OR_ZERO, 
 	DATA_IN_B => GRB_OR_RAM, 
 	DATA_OUT => INTERNAL_ALU_DATA, 
