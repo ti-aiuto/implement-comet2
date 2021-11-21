@@ -89,8 +89,8 @@ component phase_fetch is
 		PR_IN : in std_logic_vector(15 downto 0);
 		PROM_OUT : in std_logic_vector(15 downto 0);
 		PROM_ADDR_IN : out std_logic_vector(15 downto 0);
-		OP1_OUT : out std_logic_vector(15 downto 0);
-		OP2_OUT : out std_logic_vector(15 downto 0);
+		CURRENT_OP1 : out std_logic_vector(15 downto 0);
+		CURRENT_OP2 : out std_logic_vector(15 downto 0);
 		CURRENT_PR : out std_logic_vector(15 downto 0)
 	);
 end component;
@@ -161,14 +161,13 @@ signal CLK_MA : std_logic;
 signal CLK_EX : std_logic;
 signal CLK_WB : std_logic;
 
-signal OP1_OUT : std_logic_vector(15 downto 0);
-signal OP2_OUT : std_logic_vector(15 downto 0);
 signal PROM_ADDR_IN : std_logic_vector(15 downto 0);
-
 signal PROM_OUT : std_logic_vector(15 downto 0);
 signal PR_OUT : std_logic_vector(15 downto 0);
 signal FR_OUT : std_logic_vector(2 downto 0);
 
+signal CURRENT_OP1 : std_logic_vector(15 downto 0);
+signal CURRENT_OP2 : std_logic_vector(15 downto 0);
 signal CURRENT_PR : std_logic_vector(15 downto 0);
 
 signal GR0_OUT : std_logic_vector(15 downto 0);
@@ -222,15 +221,15 @@ begin
 		PR_IN => PR_OUT, 
 		PROM_OUT => PROM_OUT, 
 		PROM_ADDR_IN => PROM_ADDR_IN, 
-		OP1_OUT => OP1_OUT, 
-		OP2_OUT => OP2_OUT, 
+		CURRENT_OP1 => CURRENT_OP1, 
+		CURRENT_OP2 => CURRENT_OP2, 
 		CURRENT_PR => CURRENT_PR
 	);
 	
 	PHASE_DECODE_INSTANCE : phase_decode port map(
 		CLK => CLK_DC, 
-		OP1_IN => OP1_OUT,
-		OP2_IN => OP2_OUT,
+		OP1_IN => CURRENT_OP1,
+		OP2_IN => CURRENT_OP2,
 		GR0_IN => GR0_OUT,
 		GR1_IN => GR1_OUT,
 		GR2_IN => GR2_OUT,

@@ -9,8 +9,8 @@ entity phase_fetch is
 		PR_IN : in std_logic_vector(15 downto 0);
 		PROM_OUT : in std_logic_vector(15 downto 0);
 		PROM_ADDR_IN : out std_logic_vector(15 downto 0);
-		OP1_OUT : out std_logic_vector(15 downto 0);
-		OP2_OUT : out std_logic_vector(15 downto 0);
+		CURRENT_OP1 : out std_logic_vector(15 downto 0);
+		CURRENT_OP2 : out std_logic_vector(15 downto 0);
 		CURRENT_PR : out std_logic_vector(15 downto 0)
 	);
 end phase_fetch;
@@ -45,7 +45,6 @@ architecture RTL of phase_fetch is
 
 	signal INTERNAL_PR_OUT_PLUS1 : std_logic_vector(15 downto 0);
 	signal INTERNAL_CURRENT_PR : std_logic_vector(15 downto 0);
-
 begin
 	PROM_ADDER : adder_16bit port map( CI => '0', 
 	AIN => INTERNAL_CURRENT_PR, 
@@ -57,9 +56,9 @@ begin
 	DATA_IN_2 => INTERNAL_PR_OUT_PLUS1, 
 	DATA_OUT => PROM_ADDR_IN );
 	
-	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PROM_OUT, DATA_OUT => OP1_OUT);
-	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, WRITE_FLAG => '1', DATA_IN => PROM_OUT, DATA_OUT => OP2_OUT);
-
+	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PROM_OUT, DATA_OUT => CURRENT_OP1);
+	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, WRITE_FLAG => '1', DATA_IN => PROM_OUT, DATA_OUT => CURRENT_OP2);
 	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PR_IN, DATA_OUT => INTERNAL_CURRENT_PR);
+	
 	CURRENT_PR <= INTERNAL_CURRENT_PR;
 end RTL;
