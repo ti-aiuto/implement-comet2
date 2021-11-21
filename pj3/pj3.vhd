@@ -87,7 +87,7 @@ component phase_fetch is
 		CLK_FT2LOAD : in std_logic;
 		CLK_FT2 : in std_logic;
 		PR_IN : in std_logic_vector(15 downto 0);
-		PROM_DATA : in std_logic_vector(15 downto 0);
+		PROM_OUT : in std_logic_vector(15 downto 0);
 		PROM_ADDR : out std_logic_vector(15 downto 0);
 		OP1_OUT : out std_logic_vector(15 downto 0);
 		OP2_OUT : out std_logic_vector(15 downto 0);
@@ -220,7 +220,7 @@ begin
 		CLK_FT2LOAD => CLK_FT2LOAD, 
 		CLK_FT2 => CLK_FT2, 
 		PR_IN => PR_OUT, 
-		PROM_DATA => PROM_OUT, 
+		PROM_OUT => PROM_OUT, 
 		PROM_ADDR => PROM_ADDR, 
 		OP1_OUT => OP1_OUT, 
 		OP2_OUT => OP2_OUT, 

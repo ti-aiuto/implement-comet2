@@ -7,7 +7,7 @@ entity phase_fetch is
 		CLK_FT2LOAD : in std_logic;
 		CLK_FT2 : in std_logic;
 		PR_IN : in std_logic_vector(15 downto 0);
-		PROM_DATA : in std_logic_vector(15 downto 0);
+		PROM_OUT : in std_logic_vector(15 downto 0);
 		PROM_ADDR : out std_logic_vector(15 downto 0);
 		OP1_OUT : out std_logic_vector(15 downto 0);
 		OP2_OUT : out std_logic_vector(15 downto 0);
@@ -57,8 +57,8 @@ begin
 	DATA_IN_2 => INTERNAL_PR_OUT_PLUS1, 
 	DATA_OUT => PROM_ADDR );
 	
-	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PROM_DATA, DATA_OUT => OP1_OUT);
-	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, WRITE_FLAG => '1', DATA_IN => PROM_DATA, DATA_OUT => OP2_OUT);
+	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PROM_OUT, DATA_OUT => OP1_OUT);
+	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, WRITE_FLAG => '1', DATA_IN => PROM_OUT, DATA_OUT => OP2_OUT);
 
 	REGISTER_CURRENT_PR : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PR_IN, DATA_OUT => INTERNAL_CURRENT_PR);
 	CURRENT_PR <= INTERNAL_CURRENT_PR;
