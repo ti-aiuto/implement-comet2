@@ -104,8 +104,8 @@ component phase_execute is
 		GRB_DATA : in std_logic_vector(15 downto 0); 
 		MAIN_OP : in std_logic_vector(3 downto 0);
 		SUB_OP : in std_logic_vector(3 downto 0);
-		DATA_OUT : out std_logic_vector(15 downto 0);
-		FR_OUT : out std_logic_vector(2 downto 0);
+		NEXT_DATA : out std_logic_vector(15 downto 0);
+		NEXT_FR : out std_logic_vector(2 downto 0);
 		NEXT_PR : out std_logic_vector(15 downto 0);
 		WRITE_GR_FLAG : out std_logic;
 		WRITE_PR_FLAG : out std_logic; 
@@ -136,7 +136,7 @@ component phase_write_back is
 		GR6_OUT : out std_logic_vector(15 downto 0);
 		GR7_OUT : out std_logic_vector(15 downto 0);
 		PR_OUT : out std_logic_vector(15 downto 0);
-		CURRENT_FR : out std_logic_vector(2 downto 0)
+		FR_OUT : out std_logic_vector(2 downto 0)
 	);
 end component;
 
@@ -167,8 +167,9 @@ signal PROM_DATA : std_logic_vector(15 downto 0);
 signal PROM_ADDR : std_logic_vector(15 downto 0);
 
 signal PR_OUT : std_logic_vector(15 downto 0);
-signal CURRENT_PR : std_logic_vector(15 downto 0);
 signal FR_OUT : std_logic_vector(2 downto 0);
+
+signal CURRENT_PR : std_logic_vector(15 downto 0);
 
 signal GR0_OUT : std_logic_vector(15 downto 0);
 signal GR1_OUT : std_logic_vector(15 downto 0);
@@ -263,8 +264,8 @@ begin
 		GRB_DATA => GRB_OUT,
 		MAIN_OP => MAIN_OP,
 		SUB_OP => SUB_OP,
-		DATA_OUT => NEXT_DATA,
-		FR_OUT => NEXT_FR,
+		NEXT_DATA => NEXT_DATA,
+		NEXT_FR => NEXT_FR,
 		NEXT_PR => NEXT_PR, 
 		WRITE_GR_FLAG => WRITE_GR_FLAG,
 		WRITE_PR_FLAG => WRITE_PR_FLAG, 
@@ -274,7 +275,7 @@ begin
 	PHASE_WRITE_BACK_INSTANCE : phase_write_back port map(
 		CLK => CLK_WB,
 		PR_OUT => PR_OUT,
-		CURRENT_FR => FR_OUT,
+		FR_OUT => FR_OUT,
 		EFFECTIVE_ADDR => EFFECTIVE_ADDR,
 		NEXT_PR => NEXT_PR, 
 		NEXT_FR => NEXT_FR, 

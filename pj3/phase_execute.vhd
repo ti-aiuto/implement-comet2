@@ -10,8 +10,8 @@ entity phase_execute is
 		GRB_DATA : in std_logic_vector(15 downto 0); 
 		MAIN_OP : in std_logic_vector(3 downto 0);
 		SUB_OP : in std_logic_vector(3 downto 0);
-		DATA_OUT : out std_logic_vector(15 downto 0);
-		FR_OUT : out std_logic_vector(2 downto 0);
+		NEXT_DATA : out std_logic_vector(15 downto 0);
+		NEXT_FR : out std_logic_vector(2 downto 0);
 		NEXT_PR : out std_logic_vector(15 downto 0);
 		WRITE_GR_FLAG : out std_logic;
 		WRITE_PR_FLAG : out std_logic; 
@@ -183,8 +183,8 @@ begin
 	INTERNAL_FR_DATA(1) <= INTERNAL_ALU_DATA(15); -- 最上位ビット
 	INTERNAL_FR_DATA(2) <= not INTERNAL_ALU_DATA_OR;
 	
-	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_ALU_DATA, DATA_OUT => DATA_OUT);
-	ALU_FR_REGISTER : register_4 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => "0" & INTERNAL_FR_DATA, DATA_OUT(2 downto 0) => FR_OUT);
+	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_ALU_DATA, DATA_OUT => NEXT_DATA);
+	ALU_FR_REGISTER : register_4 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => "0" & INTERNAL_FR_DATA, DATA_OUT(2 downto 0) => NEXT_FR);
 	
 	PARSE_OP : parse_op_as_flag port map(
 		MAIN_OP => MAIN_OP,

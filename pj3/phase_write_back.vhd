@@ -21,7 +21,7 @@ entity phase_write_back is
 		GR6_OUT : out std_logic_vector(15 downto 0);
 		GR7_OUT : out std_logic_vector(15 downto 0);
 		PR_OUT : out std_logic_vector(15 downto 0);
-		CURRENT_FR : out std_logic_vector(2 downto 0)
+		FR_OUT : out std_logic_vector(2 downto 0)
 	);
 end phase_write_back;
 
@@ -64,7 +64,7 @@ component gr_controller is
 end component;
 begin
 	PR : register_16 port map(CLK_IN => CLK, WRITE_FLAG => WRITE_PR_FLAG, DATA_IN => NEXT_PR, DATA_OUT => PR_OUT);
-	FR : register_4 port map(CLK_IN => CLK, WRITE_FLAG => WRITE_FR_FLAG, DATA_IN => "0" & NEXT_FR, DATA_OUT(2 downto 0) => CURRENT_FR);
+	FR : register_4 port map(CLK_IN => CLK, WRITE_FLAG => WRITE_FR_FLAG, DATA_IN => "0" & NEXT_FR, DATA_OUT(2 downto 0) => FR_OUT);
 	
 	-- ここにRAMに入れる実装もいる	
 	GR_CONTROLLER_INSTANCE : gr_controller port map( CLK => CLK, 
