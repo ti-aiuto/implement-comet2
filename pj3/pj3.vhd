@@ -168,7 +168,7 @@ signal PROM_ADDR : std_logic_vector(15 downto 0);
 
 signal PR_OUT : std_logic_vector(15 downto 0);
 signal CURRENT_PR : std_logic_vector(15 downto 0);
-signal CURRENT_FR : std_logic_vector(2 downto 0);
+signal FR_OUT : std_logic_vector(2 downto 0);
 
 signal GR0_OUT : std_logic_vector(15 downto 0);
 signal GR1_OUT : std_logic_vector(15 downto 0);
@@ -190,10 +190,10 @@ signal GRB_OUT : std_logic_vector(15 downto 0);
 signal EFFECTIVE_ADDR : std_logic_vector(15 downto 0);
 signal RAM_DATA : std_logic_vector(15 downto 0);
 
-signal ALU_DATA : std_logic_vector(15 downto 0);
-signal ALU_FR : std_logic_vector(2 downto 0);
-
+signal NEXT_DATA : std_logic_vector(15 downto 0);
+signal NEXT_FR : std_logic_vector(2 downto 0);
 signal NEXT_PR : std_logic_vector(15 downto 0);
+
 signal WRITE_FR_FLAG : std_logic;
 signal WRITE_PR_FLAG : std_logic;
 signal WRITE_GR_FLAG : std_logic;
@@ -256,15 +256,15 @@ begin
 		CLK => CLK_EX,
 		RESET_IN => RESET_IN, 
 		CURRENT_PR => CURRENT_PR,
-		CURRENT_FR => CURRENT_FR,
+		CURRENT_FR => FR_OUT,
 		EFFECTIVE_ADDR => EFFECTIVE_ADDR,
 		RAM_DATA => RAM_DATA,
 		GRA_DATA => GRA_OUT,
 		GRB_DATA => GRB_OUT,
 		MAIN_OP => MAIN_OP,
 		SUB_OP => SUB_OP,
-		DATA_OUT => ALU_DATA,
-		FR_OUT => ALU_FR,
+		DATA_OUT => NEXT_DATA,
+		FR_OUT => NEXT_FR,
 		NEXT_PR => NEXT_PR, 
 		WRITE_GR_FLAG => WRITE_GR_FLAG,
 		WRITE_PR_FLAG => WRITE_PR_FLAG, 
@@ -274,11 +274,11 @@ begin
 	PHASE_WRITE_BACK_INSTANCE : phase_write_back port map(
 		CLK => CLK_WB,
 		PR_OUT => PR_OUT,
-		CURRENT_FR => CURRENT_FR,
+		CURRENT_FR => FR_OUT,
 		EFFECTIVE_ADDR => EFFECTIVE_ADDR,
 		NEXT_PR => NEXT_PR, 
-		NEXT_FR => ALU_FR, 
-		NEXT_DATA => ALU_DATA, 
+		NEXT_FR => NEXT_FR, 
+		NEXT_DATA => NEXT_DATA, 
 		WRITE_GR_FLAG => WRITE_GR_FLAG,
 		WRITE_PR_FLAG => WRITE_PR_FLAG, 
 		WRITE_FR_FLAG => WRITE_FR_FLAG, 		
