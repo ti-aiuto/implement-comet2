@@ -116,9 +116,10 @@ signal GRB_OR_RAM : std_logic_vector(15 downto 0);
 signal INTERNAL_ALU_OF : std_logic;
 signal INTERNAL_ALU_DATA : std_logic_vector(15 downto 0);
 signal INTERNAL_ALU_DATA_OR : std_logic;
+signal INTERNAL_NEXT_OF: std_logic;
+signal INTERNAL_NEXT_SF: std_logic;
+signal INTERNAL_NEXT_ZF: std_logic;
 signal INTERNAL_FR_DATA : std_logic_vector(2 downto 0);
-
-
 
 signal MAIN_OP_IS_JP_FLAG : std_logic;
 signal OP_IS_JMI_FLAG : std_logic;
@@ -179,9 +180,12 @@ begin
 	);
 	
 	-- ZF, SF, OFの順
-	INTERNAL_FR_DATA(0) <= INTERNAL_ALU_OF;
-	INTERNAL_FR_DATA(1) <= INTERNAL_ALU_DATA(15); -- 最上位ビット
-	INTERNAL_FR_DATA(2) <= not INTERNAL_ALU_DATA_OR;
+	INTERNAL_NEXT_OF <= INTERNAL_ALU_OF;
+	INTERNAL_NEXT_SF <= INTERNAL_ALU_DATA(15); -- 最上位ビット
+	INTERNAL_NEXT_ZF <= not INTERNAL_ALU_DATA_OR;
+	INTERNAL_FR_DATA(0) <= INTERNAL_NEXT_OF;
+	INTERNAL_FR_DATA(1) <= INTERNAL_NEXT_SF;
+	INTERNAL_FR_DATA(2) <= INTERNAL_NEXT_ZF;
 	
 	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_ALU_DATA, DATA_OUT => NEXT_DATA);
 	ALU_FR_REGISTER : register_4 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => "0" & INTERNAL_FR_DATA, DATA_OUT(2 downto 0) => NEXT_FR);
