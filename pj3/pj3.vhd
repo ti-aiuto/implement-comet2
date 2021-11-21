@@ -163,9 +163,9 @@ signal CLK_WB : std_logic;
 
 signal OP1_OUT : std_logic_vector(15 downto 0);
 signal OP2_OUT : std_logic_vector(15 downto 0);
-signal PROM_DATA : std_logic_vector(15 downto 0);
 signal PROM_ADDR : std_logic_vector(15 downto 0);
 
+signal PROM_OUT : std_logic_vector(15 downto 0);
 signal PR_OUT : std_logic_vector(15 downto 0);
 signal FR_OUT : std_logic_vector(2 downto 0);
 
@@ -213,14 +213,14 @@ begin
 	CLK_WB => CLK_WB);
 	
 	STATE_LED1 <= CLK_FT1;
-	ROM : prom port map(P_COUNT => PROM_ADDR, PROM_OUT => PROM_DATA);
+	ROM : prom port map(P_COUNT => PROM_ADDR, PROM_OUT => PROM_OUT);
 	
 	PHASE_FETCH_COMPONENT : phase_fetch port map(
 		CLK_FT1 => CLK_FT1, 
 		CLK_FT2LOAD => CLK_FT2LOAD, 
 		CLK_FT2 => CLK_FT2, 
 		PR_IN => PR_OUT, 
-		PROM_DATA => PROM_DATA, 
+		PROM_DATA => PROM_OUT, 
 		PROM_ADDR => PROM_ADDR, 
 		OP1_OUT => OP1_OUT, 
 		OP2_OUT => OP2_OUT, 
