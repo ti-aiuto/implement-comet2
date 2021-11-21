@@ -14,13 +14,6 @@ end alu;
 
 architecture RTL of alu is
 
-component not_16bit is
-	port( 
-	DATA_IN : in std_logic_vector(15 downto 0); 
-	DATA_OUT : out std_logic_vector(15 downto 0)
-	);
-end component;
-
 component multiplexer_16bit_2ways is
 	port(
 		SELECTOR : in std_logic;
@@ -48,7 +41,6 @@ component multiplexer_1bit_2ways is
 	);
 end component;
 
-signal DATA_B_NEGATED : std_logic_vector(15 downto 0);
 signal DATA_B_OR_NEGATED_DATA_B : std_logic_vector(15 downto 0);
 
 signal INTERNAL_ADD_SUB_DATA : std_logic_vector(15 downto 0);
@@ -59,15 +51,10 @@ signal DATA_A_FLAG : std_logic;
 signal DATA_B_FLAG : std_logic;
 
 begin
-	NOT_NEGATE_DATAB : not_16bit port map(
-		DATA_IN => DATA_IN_B, 
-		DATA_OUT => DATA_B_NEGATED
-	);
-	
 	MX_NEGATE_DATAB : multiplexer_16bit_2ways port map( 
 		SELECTOR => SUB_FLAG, 
 		DATA_IN_1 => DATA_IN_B, 
-		DATA_IN_2 => DATA_B_NEGATED, 
+		DATA_IN_2 => NOT DATA_IN_B, 
 		DATA_OUT => DATA_B_OR_NEGATED_DATA_B
 	);
 	

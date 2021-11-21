@@ -108,7 +108,6 @@ set_global_assignment -name VHDL_FILE full_adder.vhd
 set_global_assignment -name VHDL_FILE half_adder.vhd
 set_global_assignment -name VHDL_FILE multiplexer_16bit_4ways.vhd
 set_global_assignment -name VHDL_FILE multiplexer_16bit_8ways.vhd
-set_global_assignment -name VHDL_FILE not_16bit.vhd
 set_global_assignment -name VHDL_FILE register_4.vhd
 set_global_assignment -name VHDL_FILE phase_fetch.vhd
 set_global_assignment -name VHDL_FILE phase_execute.vhd
