@@ -88,7 +88,7 @@ component phase_fetch is
 		CLK_FT2 : in std_logic;
 		PR_IN : in std_logic_vector(15 downto 0);
 		PROM_OUT : in std_logic_vector(15 downto 0);
-		PROM_ADDR : out std_logic_vector(15 downto 0);
+		PROM_ADDR_IN : out std_logic_vector(15 downto 0);
 		OP1_OUT : out std_logic_vector(15 downto 0);
 		OP2_OUT : out std_logic_vector(15 downto 0);
 		CURRENT_PR : out std_logic_vector(15 downto 0)
@@ -163,7 +163,7 @@ signal CLK_WB : std_logic;
 
 signal OP1_OUT : std_logic_vector(15 downto 0);
 signal OP2_OUT : std_logic_vector(15 downto 0);
-signal PROM_ADDR : std_logic_vector(15 downto 0);
+signal PROM_ADDR_IN : std_logic_vector(15 downto 0);
 
 signal PROM_OUT : std_logic_vector(15 downto 0);
 signal PR_OUT : std_logic_vector(15 downto 0);
@@ -213,7 +213,7 @@ begin
 	CLK_WB => CLK_WB);
 	
 	STATE_LED1 <= CLK_FT1;
-	ROM : prom port map(P_COUNT => PROM_ADDR, PROM_OUT => PROM_OUT);
+	ROM : prom port map(P_COUNT => PROM_ADDR_IN, PROM_OUT => PROM_OUT);
 	
 	PHASE_FETCH_COMPONENT : phase_fetch port map(
 		CLK_FT1 => CLK_FT1, 
@@ -221,7 +221,7 @@ begin
 		CLK_FT2 => CLK_FT2, 
 		PR_IN => PR_OUT, 
 		PROM_OUT => PROM_OUT, 
-		PROM_ADDR => PROM_ADDR, 
+		PROM_ADDR_IN => PROM_ADDR_IN, 
 		OP1_OUT => OP1_OUT, 
 		OP2_OUT => OP2_OUT, 
 		CURRENT_PR => CURRENT_PR

@@ -8,7 +8,7 @@ entity phase_fetch is
 		CLK_FT2 : in std_logic;
 		PR_IN : in std_logic_vector(15 downto 0);
 		PROM_OUT : in std_logic_vector(15 downto 0);
-		PROM_ADDR : out std_logic_vector(15 downto 0);
+		PROM_ADDR_IN : out std_logic_vector(15 downto 0);
 		OP1_OUT : out std_logic_vector(15 downto 0);
 		OP2_OUT : out std_logic_vector(15 downto 0);
 		CURRENT_PR : out std_logic_vector(15 downto 0)
@@ -55,7 +55,7 @@ begin
 	PROM_MX : multiplexer_16bit_2ways port map( SELECTOR => CLK_FT2LOAD or CLK_FT2,
 	DATA_IN_1 => PR_IN, 
 	DATA_IN_2 => INTERNAL_PR_OUT_PLUS1, 
-	DATA_OUT => PROM_ADDR );
+	DATA_OUT => PROM_ADDR_IN );
 	
 	OP1_REGISTER : register_16 port map(CLK_IN => CLK_FT1, WRITE_FLAG => '1', DATA_IN => PROM_OUT, DATA_OUT => OP1_OUT);
 	OP2_REGISTER : register_16 port map(CLK_IN => CLK_FT2, WRITE_FLAG => '1', DATA_IN => PROM_OUT, DATA_OUT => OP2_OUT);
