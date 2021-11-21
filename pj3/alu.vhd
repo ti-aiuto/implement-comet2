@@ -6,6 +6,7 @@ entity alu is
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
 		SUB_FLAG : in std_logic;
+		LOGICAL_CALC_FLAG : in std_logic;
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
