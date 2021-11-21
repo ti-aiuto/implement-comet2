@@ -61,6 +61,15 @@ component register_4 is
 	);
 end component;
 
+component register_1 is
+	port(
+		CLK_IN : in std_logic;
+		WRITE_FLAG : in std_logic;
+		DATA_IN : in std_logic;
+		DATA_OUT : out std_logic
+	);
+end component;
+
 component or_in_16bit_out_1bit is
 	port( 
 	DATA_IN : in std_logic_vector(15 downto 0); 
@@ -145,10 +154,25 @@ begin
 	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG OR OP_IS_LD_FLAG;
 	USE_RAM_AS_GRB_FLAG <= OP_IS_LAD_FLAG; -- TODO: データBをRAMから読み込む2語命令をここに追加
 	
-	WRITE_GR_FLAG <= OP_NEEDS_WRITE_GR_FLAG;
-	WRITE_PR_FLAG <= RESET_IN OR OP_NEEDS_WRITE_PR_FLAG;
-	WRITE_FR_FLAG <= OP_NEEDS_WRITE_FR_FLAG;	
-	
+	REGISTER_WRITE_GR : register_1 port map(
+		CLK_IN => CLK, 
+		WRITE_FLAG => '1', 
+		DATA_IN => OP_NEEDS_WRITE_GR_FLAG, 
+		DATA_OUT => WRITE_GR_FLAG
+	);
+	REGISTER_WRITE_PR : register_1 port map(
+		CLK_IN => CLK, 
+		WRITE_FLAG => '1', 
+		DATA_IN => RESET_IN OR OP_NEEDS_WRITE_PR_FLAG, 
+		DATA_OUT => WRITE_PR_FLAG
+	);
+	REGISTER_WRITE_FR : register_1 port map(
+		CLK_IN => CLK, 
+		WRITE_FLAG => '1', 
+		DATA_IN => OP_NEEDS_WRITE_FR_FLAG, 
+		DATA_OUT => WRITE_FR_FLAG
+	);
+		
 	RAM_MX : multiplexer_16bit_2ways port map(
 		SELECTOR => OP_IS_LAD_FLAG, -- LADの場合はRAM値ではなくRAM番地をデータBとして使う
 		DATA_IN_1 => RAM_IN,
