@@ -93,7 +93,6 @@ component parse_op_as_flag is
 	);
 end component;
 
-
 component adder_16bit is
 	port(
 		CI : in std_logic;
@@ -184,7 +183,6 @@ begin
 		DATA_OUT => INTERNAL_ALU_DATA_OR
 	);
 	
-	-- ZF, SF, OFの順
 	INTERNAL_NEXT_OF <= INTERNAL_ALU_OF;
 	INTERNAL_NEXT_SF <= INTERNAL_ALU_DATA(15); -- 最上位ビット
 	INTERNAL_NEXT_ZF <= not INTERNAL_ALU_DATA_OR;
@@ -196,6 +194,7 @@ begin
 		DATA_OUT => NEXT_DATA
 	);
 	
+	-- ZF, SF, OFの順
 	ALU_FR_REGISTER : register_4 port map(
 		CLK_IN => CLK, 
 		WRITE_FLAG => '1', 
@@ -251,7 +250,6 @@ begin
 		DATA_OUT => NEXT_PR_OR_JP_ADDR
 	);
 	
-	-- execにうつしてもいいかも
 	NEXT_PR_MX : multiplexer_16bit_2ways port map(
 		SELECTOR => RESET_IN, 
 		DATA_IN_1 => NEXT_PR_OR_JP_ADDR, 
