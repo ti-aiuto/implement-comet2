@@ -148,7 +148,7 @@ signal USE_JP_FLAG: std_logic;
 signal WORDS_COUNT_TO_ADD : std_logic_vector(15 downto 0);
 signal PR_WORD_ADDED : std_logic_vector(15 downto 0);
 signal NEXT_PR_OR_JP_ADDR : std_logic_vector(15 downto 0);
-
+signal INTERNAL_NEXT_PR : std_logic_vector(15 downto 0);
 
 begin
 	USE_ZERO_AS_GRA_FLAG <= OP_IS_LAD_FLAG OR OP_IS_LD_FLAG;
@@ -278,6 +278,13 @@ begin
 		SELECTOR => RESET_IN, 
 		DATA_IN_1 => NEXT_PR_OR_JP_ADDR, 
 		DATA_IN_2 => "0000000000000000", -- reset
+		DATA_OUT => INTERNAL_NEXT_PR
+	);
+	
+	NEXT_PR_REGISTER : register_16 port map(
+		CLK_IN => CLK, 
+		WRITE_FLAG => '1', 
+		DATA_IN => INTERNAL_NEXT_PR, 
 		DATA_OUT => NEXT_PR
 	);
 end RTL;
