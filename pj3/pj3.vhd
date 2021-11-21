@@ -58,6 +58,19 @@ component prom is
 	);
 end component;
 
+component phase_fetch is
+	port(
+		CLK_FT1 : in std_logic;
+		CLK_FT2LOAD : in std_logic;
+		CLK_FT2 : in std_logic;
+		PR_IN : in std_logic_vector(15 downto 0);
+		PROM_OUT : in std_logic_vector(15 downto 0);
+		PROM_ADDR_IN : out std_logic_vector(15 downto 0);
+		CURRENT_OP1 : out std_logic_vector(15 downto 0);
+		CURRENT_OP2 : out std_logic_vector(15 downto 0);
+		CURRENT_PR : out std_logic_vector(15 downto 0)
+	);
+end component;
 
 component phase_decode is
 	port(
@@ -72,26 +85,12 @@ component phase_decode is
 		GR5_IN : in std_logic_vector(15 downto 0);
 		GR6_IN : in std_logic_vector(15 downto 0);
 		GR7_IN : in std_logic_vector(15 downto 0);
-		GRA_SELECT : out std_logic_vector(2 downto 0);
-		GRA_OUT : out std_logic_vector(15 downto 0);
-		GRB_OUT : out std_logic_vector(15 downto 0);
-		MAIN_OP : out std_logic_vector(3 downto 0);
-		SUB_OP : out std_logic_vector(3 downto 0);
-		EFFECTIVE_ADDR : out std_logic_vector(15 downto 0)
-	);
-end component;
-
-component phase_fetch is
-	port(
-		CLK_FT1 : in std_logic;
-		CLK_FT2LOAD : in std_logic;
-		CLK_FT2 : in std_logic;
-		PR_IN : in std_logic_vector(15 downto 0);
-		PROM_OUT : in std_logic_vector(15 downto 0);
-		PROM_ADDR_IN : out std_logic_vector(15 downto 0);
-		CURRENT_OP1 : out std_logic_vector(15 downto 0);
-		CURRENT_OP2 : out std_logic_vector(15 downto 0);
-		CURRENT_PR : out std_logic_vector(15 downto 0)
+		CURRENT_GRA_SELECT : out std_logic_vector(2 downto 0);
+		CURRENT_GRA : out std_logic_vector(15 downto 0);
+		CURRENT_GRB : out std_logic_vector(15 downto 0);
+		CURRENT_MAIN_OP : out std_logic_vector(3 downto 0);
+		CURRENT_SUB_OP : out std_logic_vector(3 downto 0);
+		CURRENT_EFFECTIVE_ADDR : out std_logic_vector(15 downto 0)
 	);
 end component;
 
@@ -166,10 +165,6 @@ signal PROM_OUT : std_logic_vector(15 downto 0);
 signal PR_OUT : std_logic_vector(15 downto 0);
 signal FR_OUT : std_logic_vector(2 downto 0);
 
-signal CURRENT_OP1 : std_logic_vector(15 downto 0);
-signal CURRENT_OP2 : std_logic_vector(15 downto 0);
-signal CURRENT_PR : std_logic_vector(15 downto 0);
-
 signal GR0_OUT : std_logic_vector(15 downto 0);
 signal GR1_OUT : std_logic_vector(15 downto 0);
 signal GR2_OUT : std_logic_vector(15 downto 0);
@@ -179,15 +174,18 @@ signal GR5_OUT : std_logic_vector(15 downto 0);
 signal GR6_OUT : std_logic_vector(15 downto 0);
 signal GR7_OUT : std_logic_vector(15 downto 0);
 
-signal MAIN_OP : std_logic_vector(3 downto 0);
-signal SUB_OP : std_logic_vector(3 downto 0);
+signal CURRENT_OP1 : std_logic_vector(15 downto 0);
+signal CURRENT_OP2 : std_logic_vector(15 downto 0);
+signal CURRENT_PR : std_logic_vector(15 downto 0);
 
-signal GRA_SELECT : std_logic_vector(2 downto 0);
-signal GRB_SELECT : std_logic_vector(2 downto 0);
-signal GRA_OUT : std_logic_vector(15 downto 0);
-signal GRB_OUT : std_logic_vector(15 downto 0);
+signal CURRENT_MAIN_OP : std_logic_vector(3 downto 0);
+signal CURRENT_SUB_OP : std_logic_vector(3 downto 0);
 
-signal EFFECTIVE_ADDR : std_logic_vector(15 downto 0);
+signal CURRENT_GRA_SELECT : std_logic_vector(2 downto 0);
+signal CURRENT_GRA : std_logic_vector(15 downto 0);
+signal CURRENT_GRB : std_logic_vector(15 downto 0);
+signal CURRENT_EFFECTIVE_ADDR : std_logic_vector(15 downto 0);
+
 signal RAM_DATA : std_logic_vector(15 downto 0);
 
 signal NEXT_DATA : std_logic_vector(15 downto 0);
@@ -238,12 +236,12 @@ begin
 		GR5_IN => GR5_OUT,
 		GR6_IN => GR6_OUT,
 		GR7_IN => GR7_OUT,
-		GRA_SELECT => GRA_SELECT, 
-		GRA_OUT => GRA_OUT, 
-		GRB_OUT => GRB_OUT, 
-		MAIN_OP => MAIN_OP, 
-		SUB_OP => SUB_OP, 
-		EFFECTIVE_ADDR => EFFECTIVE_ADDR
+		CURRENT_GRA_SELECT => CURRENT_GRA_SELECT, 
+		CURRENT_GRA => CURRENT_GRA, 
+		CURRENT_GRB => CURRENT_GRB, 
+		CURRENT_MAIN_OP => CURRENT_MAIN_OP, 
+		CURRENT_SUB_OP => CURRENT_SUB_OP, 
+		CURRENT_EFFECTIVE_ADDR => CURRENT_EFFECTIVE_ADDR
 	);
 	
 	RAM_DATA_REGISTER : register_16 port map( CLK_IN => CLK_MA, 
@@ -257,12 +255,12 @@ begin
 		RESET_IN => RESET_IN, 
 		CURRENT_PR => CURRENT_PR,
 		CURRENT_FR => FR_OUT,
-		EFFECTIVE_ADDR => EFFECTIVE_ADDR,
+		EFFECTIVE_ADDR => CURRENT_EFFECTIVE_ADDR,
 		RAM_DATA => RAM_DATA,
-		GRA_DATA => GRA_OUT,
-		GRB_DATA => GRB_OUT,
-		MAIN_OP => MAIN_OP,
-		SUB_OP => SUB_OP,
+		GRA_DATA => CURRENT_GRA,
+		GRB_DATA => CURRENT_GRB,
+		MAIN_OP => CURRENT_MAIN_OP,
+		SUB_OP => CURRENT_SUB_OP,
 		NEXT_DATA => NEXT_DATA,
 		NEXT_FR => NEXT_FR,
 		NEXT_PR => NEXT_PR, 
@@ -275,7 +273,7 @@ begin
 		CLK => CLK_WB,
 		PR_OUT => PR_OUT,
 		FR_OUT => FR_OUT,
-		EFFECTIVE_ADDR => EFFECTIVE_ADDR,
+		EFFECTIVE_ADDR => CURRENT_EFFECTIVE_ADDR,
 		NEXT_PR => NEXT_PR, 
 		NEXT_FR => NEXT_FR, 
 		NEXT_DATA => NEXT_DATA, 
@@ -290,7 +288,7 @@ begin
 		GR5_OUT => GR5_OUT, 
 		GR6_OUT => GR6_OUT, 
 		GR7_OUT => GR7_OUT, 
-		GR_SELECT => GRA_SELECT
+		GR_SELECT => CURRENT_GRA_SELECT
 	);
 		
 	DEC1 : bin_16_dec_dynamic_6 port map( CLK_IN => CLK_SLOW_7SEG,
