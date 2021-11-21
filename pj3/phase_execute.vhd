@@ -54,6 +54,13 @@ component register_4 is
 	);
 end component;
 
+component or_in_16bit_out_1bit is
+	port( 
+	DATA_IN : in std_logic_vector(15 downto 0); 
+	DATA_OUT : out std_logic
+	);
+end component;
+
 signal USE_RAM_ADDR_AS_DATA_FLAG : std_logic;
 signal EFFECTIVE_ADDR_OR_RAM_OUT : std_logic_vector(15 downto 0);
 
@@ -65,6 +72,7 @@ signal GRB_OR_RAM : std_logic_vector(15 downto 0);
 
 signal INTERNAL_ALU_OF : std_logic;
 signal INTERNAL_ALU_DATA : std_logic_vector(15 downto 0);
+signal INTERNAL_ALU_DATA_OR : std_logic;
 signal INTERNAL_FR_DATA : std_logic_vector(2 downto 0);
 
 signal OP_IS_LAD_FLAG : std_logic;
@@ -108,13 +116,15 @@ begin
 	DATA_OUT => INTERNAL_ALU_DATA, 
 	OF_OUT => INTERNAL_ALU_OF);
 
+	OR_FR_IN : or_in_16bit_out_1bit port map( 
+		DATA_IN => INTERNAL_ALU_DATA, 
+		DATA_OUT => INTERNAL_ALU_DATA_OR
+	);
+	
 	-- ZF, SF, OFの順
 	INTERNAL_FR_DATA(0) <= INTERNAL_ALU_OF;
 	INTERNAL_FR_DATA(1) <= INTERNAL_ALU_DATA(15); -- 最上位ビット
-	INTERNAL_FR_DATA(2) <= not (INTERNAL_ALU_DATA(15) or INTERNAL_ALU_DATA(14) or INTERNAL_ALU_DATA(13) or INTERNAL_ALU_DATA(12) 
-		or INTERNAL_ALU_DATA(11) or INTERNAL_ALU_DATA(10) or INTERNAL_ALU_DATA(9) or INTERNAL_ALU_DATA(8) 
-		or INTERNAL_ALU_DATA(7) or INTERNAL_ALU_DATA(6) or INTERNAL_ALU_DATA(5) or INTERNAL_ALU_DATA(4) 
-		or INTERNAL_ALU_DATA(3) or INTERNAL_ALU_DATA(2) or INTERNAL_ALU_DATA(1) or INTERNAL_ALU_DATA(0));
+	INTERNAL_FR_DATA(2) <= not INTERNAL_ALU_DATA_OR;
 	
 	ALU_DATA_REGISTER : register_16 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => INTERNAL_ALU_DATA, DATA_OUT => DATA_OUT);
 	ALU_FR_REGISTER : register_4 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => "0" & INTERNAL_FR_DATA, DATA_OUT(2 downto 0) => FR_OUT);
