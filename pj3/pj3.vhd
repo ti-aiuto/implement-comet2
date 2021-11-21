@@ -186,7 +186,7 @@ signal CURRENT_GRA : std_logic_vector(15 downto 0);
 signal CURRENT_GRB : std_logic_vector(15 downto 0);
 signal CURRENT_EFFECTIVE_ADDR : std_logic_vector(15 downto 0);
 
-signal RAM_DATA : std_logic_vector(15 downto 0);
+signal CURRENT_RAM : std_logic_vector(15 downto 0);
 
 signal NEXT_DATA : std_logic_vector(15 downto 0);
 signal NEXT_FR : std_logic_vector(2 downto 0);
@@ -247,7 +247,7 @@ begin
 	RAM_DATA_REGISTER : register_16 port map( CLK_IN => CLK_MA, 
 	WRITE_FLAG => '1', 
 	DATA_IN => "0000000000000000", -- ここにRAMからもってくる実装を入れる 
-	DATA_OUT => RAM_DATA);
+	DATA_OUT => CURRENT_RAM);
 
 	PHASE_EXECUTE_INSTANCE : phase_execute port map
 	(
@@ -256,7 +256,7 @@ begin
 		PR_IN => CURRENT_PR,
 		FR_IN => FR_OUT,
 		EFFECTIVE_ADDR_IN => CURRENT_EFFECTIVE_ADDR,
-		RAM_IN => RAM_DATA,
+		RAM_IN => CURRENT_RAM,
 		GRA_IN => CURRENT_GRA,
 		GRB_IN => CURRENT_GRB,
 		MAIN_OP_IN => CURRENT_MAIN_OP,
