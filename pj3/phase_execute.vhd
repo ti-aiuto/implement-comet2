@@ -4,7 +4,7 @@ use IEEE.std_logic_1164.all;
 entity phase_execute is
 	port(
 		CLK : in std_logic; 
-		RESET_IN : in std_logic; -- 負論理
+		RESET_IN : in std_logic;
 		EFFECTIVE_ADDR_IN : in std_logic_vector(15 downto 0);
 		RAM_IN : in std_logic_vector(15 downto 0);
 		GRA_IN : in std_logic_vector(15 downto 0);
@@ -275,7 +275,7 @@ begin
 	);
 	
 	NEXT_PR_MX : multiplexer_16bit_2ways port map(
-		SELECTOR => not RESET_IN, 
+		SELECTOR => RESET_IN, 
 		DATA_IN_1 => NEXT_PR_OR_JP_ADDR, 
 		DATA_IN_2 => "0000000000000000", -- reset
 		DATA_OUT => NEXT_PR

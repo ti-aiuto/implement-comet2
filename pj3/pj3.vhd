@@ -252,7 +252,7 @@ begin
 	PHASE_EXECUTE_INSTANCE : phase_execute port map
 	(
 		CLK => CLK_EX,
-		RESET_IN => not RESET_IN, 
+		RESET_IN => RESET_IN, 
 		PR_IN => CURRENT_PR,
 		FR_IN => FR_OUT,
 		EFFECTIVE_ADDR_IN => CURRENT_EFFECTIVE_ADDR,
