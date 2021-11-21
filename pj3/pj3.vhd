@@ -97,21 +97,21 @@ end component;
 component phase_execute is
 	port(
 		CLK : in std_logic;
-		EFFECTIVE_ADDR : in std_logic_vector(15 downto 0);
-		RAM_DATA : in std_logic_vector(15 downto 0);
-		GRA_DATA : in std_logic_vector(15 downto 0);
-		GRB_DATA : in std_logic_vector(15 downto 0); 
-		MAIN_OP : in std_logic_vector(3 downto 0);
-		SUB_OP : in std_logic_vector(3 downto 0);
+		EFFECTIVE_ADDR_IN : in std_logic_vector(15 downto 0);
+		RAM_IN : in std_logic_vector(15 downto 0);
+		GRA_IN : in std_logic_vector(15 downto 0);
+		GRB_IN : in std_logic_vector(15 downto 0); 
+		MAIN_OP_IN : in std_logic_vector(3 downto 0);
+		SUB_OP_IN : in std_logic_vector(3 downto 0);
+		PR_IN : in std_logic_vector(15 downto 0);
+		FR_IN : in std_logic_vector(2 downto 0);
 		NEXT_DATA : out std_logic_vector(15 downto 0);
 		NEXT_FR : out std_logic_vector(2 downto 0);
 		NEXT_PR : out std_logic_vector(15 downto 0);
 		WRITE_GR_FLAG : out std_logic;
 		WRITE_PR_FLAG : out std_logic; 
 		WRITE_FR_FLAG : out std_logic; 
-		RESET_IN : in std_logic;
-		CURRENT_PR : in std_logic_vector(15 downto 0);
-		CURRENT_FR : in std_logic_vector(2 downto 0)
+		RESET_IN : in std_logic
 	);
 end component;
 
@@ -253,14 +253,14 @@ begin
 	(
 		CLK => CLK_EX,
 		RESET_IN => RESET_IN, 
-		CURRENT_PR => CURRENT_PR,
-		CURRENT_FR => FR_OUT,
-		EFFECTIVE_ADDR => CURRENT_EFFECTIVE_ADDR,
-		RAM_DATA => RAM_DATA,
-		GRA_DATA => CURRENT_GRA,
-		GRB_DATA => CURRENT_GRB,
-		MAIN_OP => CURRENT_MAIN_OP,
-		SUB_OP => CURRENT_SUB_OP,
+		PR_IN => CURRENT_PR,
+		FR_IN => FR_OUT,
+		EFFECTIVE_ADDR_IN => CURRENT_EFFECTIVE_ADDR,
+		RAM_IN => RAM_DATA,
+		GRA_IN => CURRENT_GRA,
+		GRB_IN => CURRENT_GRB,
+		MAIN_OP_IN => CURRENT_MAIN_OP,
+		SUB_OP_IN => CURRENT_SUB_OP,
 		NEXT_DATA => NEXT_DATA,
 		NEXT_FR => NEXT_FR,
 		NEXT_PR => NEXT_PR, 

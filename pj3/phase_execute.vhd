@@ -4,21 +4,21 @@ use IEEE.std_logic_1164.all;
 entity phase_execute is
 	port(
 		CLK : in std_logic;
-		EFFECTIVE_ADDR : in std_logic_vector(15 downto 0);
-		RAM_DATA : in std_logic_vector(15 downto 0);
-		GRA_DATA : in std_logic_vector(15 downto 0);
-		GRB_DATA : in std_logic_vector(15 downto 0); 
-		MAIN_OP : in std_logic_vector(3 downto 0);
-		SUB_OP : in std_logic_vector(3 downto 0);
+		EFFECTIVE_ADDR_IN : in std_logic_vector(15 downto 0);
+		RAM_IN : in std_logic_vector(15 downto 0);
+		GRA_IN : in std_logic_vector(15 downto 0);
+		GRB_IN : in std_logic_vector(15 downto 0); 
+		MAIN_OP_IN : in std_logic_vector(3 downto 0);
+		SUB_OP_IN : in std_logic_vector(3 downto 0);
+		PR_IN : in std_logic_vector(15 downto 0);
+		FR_IN : in std_logic_vector(2 downto 0);
 		NEXT_DATA : out std_logic_vector(15 downto 0);
 		NEXT_FR : out std_logic_vector(2 downto 0);
 		NEXT_PR : out std_logic_vector(15 downto 0);
 		WRITE_GR_FLAG : out std_logic;
 		WRITE_PR_FLAG : out std_logic; 
 		WRITE_FR_FLAG : out std_logic; 
-		RESET_IN : in std_logic;
-		CURRENT_PR : in std_logic_vector(15 downto 0);
-		CURRENT_FR : in std_logic_vector(2 downto 0)
+		RESET_IN : in std_logic
 	);
 end phase_execute;
 
@@ -152,18 +152,18 @@ begin
 	USE_RAM_AS_GRB_FLAG <= OP_IS_LAD_FLAG;
 	
 	RAM_MX : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_ADDR_AS_DATA_FLAG, 
-	DATA_IN_1 => RAM_DATA,
-	DATA_IN_2 => EFFECTIVE_ADDR,
+	DATA_IN_1 => RAM_IN,
+	DATA_IN_2 => EFFECTIVE_ADDR_IN,
 	DATA_OUT	=> EFFECTIVE_ADDR_OR_RAM_OUT);
 
 	MX_GRA_OR_ZERO : multiplexer_16bit_2ways port map( SELECTOR => USE_ZERO_AS_GRA_FLAG, 
-	DATA_IN_1 => GRA_DATA, 
+	DATA_IN_1 => GRA_IN, 
 	DATA_IN_2 => "0000000000000000", 
 	DATA_OUT => GRA_OR_ZERO);
 	
 	USE_RAM_AS_GRB_FLAG <= OP_IS_LAD_FLAG;
 	MX_GRB_OR_RAM : multiplexer_16bit_2ways port map( SELECTOR => USE_RAM_AS_GRB_FLAG, 
-	DATA_IN_1 => GRB_DATA, 
+	DATA_IN_1 => GRB_IN, 
 	DATA_IN_2 => EFFECTIVE_ADDR_OR_RAM_OUT, 
 	DATA_OUT => GRB_OR_RAM);
 				
@@ -187,8 +187,8 @@ begin
 	ALU_FR_REGISTER : register_4 port map(CLK_IN => CLK, WRITE_FLAG => '1', DATA_IN => "0" & INTERNAL_FR_DATA, DATA_OUT(2 downto 0) => NEXT_FR);
 	
 	PARSE_OP : parse_op_as_flag port map(
-		MAIN_OP => MAIN_OP,
-		SUB_OP => SUB_OP,
+		MAIN_OP => MAIN_OP_IN,
+		SUB_OP => SUB_OP_IN,
 		MAIN_OP_IS_JP_FLAG => MAIN_OP_IS_JP_FLAG, 
 		MAIN_OP_IS_CP_FLAG => MAIN_OP_IS_CP_FLAG, 
 		OP_IS_JMI_FLAG => OP_IS_JMI_FLAG, 
@@ -213,22 +213,22 @@ begin
 		DATA_IN_2 => "0000000000000010", 
 		DATA_OUT => WORDS_COUNT_TO_ADD
 	);
-	PR_ADDER : adder_16bit port map( CI => '0', AIN => CURRENT_PR, BIN => WORDS_COUNT_TO_ADD, SUM(15 downto 0) => PR_WORD_ADDED);	
+	PR_ADDER : adder_16bit port map( CI => '0', AIN => PR_IN, BIN => WORDS_COUNT_TO_ADD, SUM(15 downto 0) => PR_WORD_ADDED);	
 	
 	-- このへんはWBの立ち上がりで使うものなのでレジスタで覚えない
 	WRITE_PR_OP_OR_RESET_FLAG <= RESET_IN OR OP_NEEDS_WRITE_PR_FLAG;
 	
-	USE_JP_FLAG <= (OP_IS_JMI_FLAG and CURRENT_FR(1))
-		or (OP_IS_JNZ_FLAG and not CURRENT_FR(2))
-		or (OP_IS_JZE_FLAG and CURRENT_FR(2))
+	USE_JP_FLAG <= (OP_IS_JMI_FLAG and FR_IN(1))
+		or (OP_IS_JNZ_FLAG and not FR_IN(2))
+		or (OP_IS_JZE_FLAG and FR_IN(2))
 		or OP_IS_JUMP_FLAG
-		or (OP_IS_JPL_FLAG and not CURRENT_FR(1) and not CURRENT_FR(2))
-		or (OP_IS_JOV_FLAG and CURRENT_FR(0));
+		or (OP_IS_JPL_FLAG and not FR_IN(1) and not FR_IN(2))
+		or (OP_IS_JOV_FLAG and FR_IN(0));
 	
 	NEXT_OR_JP_MUX : multiplexer_16bit_2ways port map(
 		SELECTOR => MAIN_OP_IS_JP_FLAG and USE_JP_FLAG, 
 		DATA_IN_1 => PR_WORD_ADDED, 
-		DATA_IN_2 => EFFECTIVE_ADDR, 
+		DATA_IN_2 => EFFECTIVE_ADDR_IN, 
 		DATA_OUT => NEXT_PR_OR_JP_ADDR
 	);
 	
