@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity shift_4 is
+entity shift_8 is
 	port(
 		DATA_IN: in std_logic_vector(15 downto 0);
 		OF_IN: in std_logic;
@@ -11,9 +11,9 @@ entity shift_4 is
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
-end shift_4;
+end shift_8;
 
-architecture RTL of shift_4 is
+architecture RTL of shift_8 is
 
 component multiplexer_16bit_4ways is
 	port(
@@ -61,19 +61,21 @@ signal INTERNAL_OF: std_logic;
 begin
 	MX_DATA: multiplexer_16bit_4ways port map(
 		SELECTOR => LOGICAL_CALC_FLAG & RIGHT_FLAG, 
-		DATA_IN_1 => DATA_IN(15) & DATA_IN(10 downto 0) & "0000", -- 左算術シフト
-		DATA_IN_2 => DATA_IN(15) & DATA_IN(15) & DATA_IN(15) & DATA_IN(15) & DATA_IN(15) & DATA_IN(14 downto 4), -- 右算術シフト
-		DATA_IN_3 => DATA_IN(11 downto 0) & "0000", --左論理シフト
-		DATA_IN_4 => "0000" & DATA_IN(15 downto 4), --右論理シフト
+		DATA_IN_1 => DATA_IN(15) & DATA_IN(6 downto 0) & "00000000", -- 左算術シフト
+		DATA_IN_2 => DATA_IN(15) 
+			& DATA_IN(15) & DATA_IN(15) & DATA_IN(15) & DATA_IN(15) 
+			& DATA_IN(15) & DATA_IN(15) & DATA_IN(15) & DATA_IN(15) & DATA_IN(14 downto 8), -- 右算術シフト
+		DATA_IN_3 => DATA_IN(7 downto 0) & "00000000", --左論理シフト
+		DATA_IN_4 => "00000000" & DATA_IN(15 downto 8), --右論理シフト
 		DATA_OUT => INTERNAL_DATA
 	);
 	
 	MX_OF: multiplexer_1bit_4ways port map(
 		SELECTOR => LOGICAL_CALC_FLAG & RIGHT_FLAG, 
-		DATA_IN_1 => DATA_IN(11), -- 左算術シフト
-		DATA_IN_2 => DATA_IN(3), -- 右算術シフト
-		DATA_IN_3 => DATA_IN(12), --左論理シフト
-		DATA_IN_4 => DATA_IN(3), --右論理シフト
+		DATA_IN_1 => DATA_IN(7), -- 左算術シフト
+		DATA_IN_2 => DATA_IN(7), -- 右算術シフト
+		DATA_IN_3 => DATA_IN(8), --左論理シフト
+		DATA_IN_4 => DATA_IN(7), --右論理シフト
 		DATA_OUT => INTERNAL_OF
 	);
 	
