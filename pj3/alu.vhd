@@ -5,10 +5,10 @@ entity alu is
 	port(
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
-		OPERATION_TYPE : in std_logic_vector(1 downto 0); -- 00:ADDSUB, 01: LOGICAL, 10: SHIFT
-		SUB_FLAG : in std_logic;
-		LOGICAL_MODE_FLAG : in std_logic;
-		SHIFT_RIGHT_FLAG : in std_logic;
+		OPERATION_TYPE : in std_logic_vector(1 downto 0); -- 00:ADDSUBCP, 01: LOGICAL, 10: SHIFT
+		OP_ARITHMETIC_CALC_OPTIONS: in std_logic_vector(1 downto 0); -- LOGICAL_MODE, SUB_FLAG
+		OP_LOGICAL_CALC_OPTIONS: in std_logic_vector(1 downto 0); -- 00: AND, 01: OR, 10: XOR
+		OP_SHIFT_CALC_OPTIONS: in std_logic_vector(1 downto 0); -- LOGICAL_MODE, RIGHT_FLAG
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -16,70 +16,107 @@ end alu;
 
 architecture RTL of alu is
 
-component multiplexer_16bit_2ways is
+component multiplexer_16bit_4ways is
 	port(
-		SELECTOR : in std_logic;
+		SELECTOR : in std_logic_vector(1 downto 0);
 		DATA_IN_1 : in std_logic_vector(15 downto 0);
 		DATA_IN_2 : in std_logic_vector(15 downto 0);
+		DATA_IN_3 : in std_logic_vector(15 downto 0);
+		DATA_IN_4 : in std_logic_vector(15 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0)
 	);
 end component;
 
-component adder_16bit is
+component multiplexer_1bit_4ways is
 	port(
-		CI : in std_logic;
-		AIN : in std_logic_vector(15 downto 0);
-		BIN : in std_logic_vector(15 downto 0);
-		SUM : out std_logic_vector(16 downto 0)
-	);
-end component;
-
-component multiplexer_1bit_2ways is
-	port(
-		SELECTOR : in std_logic;
+		SELECTOR : in std_logic_vector(1 downto 0);
 		DATA_IN_1 : in std_logic;
 		DATA_IN_2 : in std_logic;
+		DATA_IN_3 : in std_logic;
+		DATA_IN_4 : in std_logic;
 		DATA_OUT : out std_logic
 	);
 end component;
 
-signal DATA_B_OR_NEGATED_DATA_B : std_logic_vector(15 downto 0);
+component alu_arithmetic_calc is
+	port(
+		DATA_IN_A: in std_logic_vector(15 downto 0);
+		DATA_IN_B: in std_logic_vector(15 downto 0);
+		OPTIONS : in std_logic_vector(1 downto 0);
+		DATA_OUT : out std_logic_vector(15 downto 0);
+		OF_OUT : out std_logic
+	);
+end component;
 
-signal INTERNAL_ADD_SUB_DATA : std_logic_vector(15 downto 0);
-signal INTERNAL_LOGICAL_OF: std_logic;
-signal INTERNAL_ARITHMETIC_OF: std_logic;
+component alu_logical_calc is
+	port(
+		DATA_IN_A: in std_logic_vector(15 downto 0);
+		DATA_IN_B: in std_logic_vector(15 downto 0);
+		OPTIONS : in std_logic_vector(1 downto 0);
+		DATA_OUT : out std_logic_vector(15 downto 0);
+		OF_OUT : out std_logic
+	);
+end component;
 
-signal DATA_A_FLAG : std_logic;
-signal DATA_B_FLAG : std_logic;
+component alu_shift_calc is
+	port(
+		DATA_IN_A: in std_logic_vector(15 downto 0);
+		DATA_IN_B: in std_logic_vector(15 downto 0);
+		OPTIONS : in std_logic_vector(1 downto 0);
+		DATA_OUT : out std_logic_vector(15 downto 0);
+		OF_OUT : out std_logic
+	);
+end component;
+
+signal DATA_OUT_ARITHMETIC: std_logic_vector(15 downto 0);
+signal DATA_OUT_LOGICAL_CALC: std_logic_vector(15 downto 0);
+signal DATA_OUT_SHIFT: std_logic_vector(15 downto 0);
+
+signal OF_OUT_ARITHMETIC: std_logic;
+signal OF_OUT_LOGICAL_CALC: std_logic;
+signal OF_OUT_SHIFT: std_logic;
 
 begin
-	MX_NEGATE_DATAB : multiplexer_16bit_2ways port map( 
-		SELECTOR => SUB_FLAG, 
-		DATA_IN_1 => DATA_IN_B, 
-		DATA_IN_2 => NOT DATA_IN_B, 
-		DATA_OUT => DATA_B_OR_NEGATED_DATA_B
+	ARITH_INSTANCE: alu_arithmetic_calc port map(
+		DATA_IN_A => DATA_IN_A, 
+		DATA_IN_B => DATA_IN_B, 
+		OPTIONS => OP_ARITHMETIC_CALC_OPTIONS, 
+		DATA_OUT => DATA_OUT_ARITHMETIC, 
+		OF_OUT => OF_OUT_ARITHMETIC
 	);
 	
-	ALU_ADDER : adder_16bit port map( 
-		CI => SUB_FLAG, 
-		AIN => DATA_IN_A, 
-		BIN => DATA_B_OR_NEGATED_DATA_B, 
-		SUM(15 downto 0) => INTERNAL_ADD_SUB_DATA, 
-		SUM(16) => INTERNAL_LOGICAL_OF
+	LOGICAL_INSTANCE: alu_logical_calc port map(
+		DATA_IN_A => DATA_IN_A, 
+		DATA_IN_B => DATA_IN_B, 
+		OPTIONS => OP_LOGICAL_CALC_OPTIONS, 
+		DATA_OUT => DATA_OUT_LOGICAL_CALC, 
+		OF_OUT => OF_OUT_LOGICAL_CALC
 	);
-
-	DATA_A_FLAG <= DATA_IN_A(15);
-	DATA_B_FLAG <= DATA_IN_B(15) xor SUB_FLAG; -- 負数かつ加算、正数かつ減算のとき1
-	INTERNAL_ARITHMETIC_OF <= NOT(DATA_A_FLAG XOR DATA_B_FLAG) -- 正負が同じかつ
-		AND (DATA_A_FLAG XOR INTERNAL_ADD_SUB_DATA(15)); -- 正負が変わっているときあふれ
-
-	OF_SELECTOR : multiplexer_1bit_2ways port map(
-		SELECTOR => LOGICAL_MODE_FLAG, 
-		DATA_IN_1 => INTERNAL_ARITHMETIC_OF, 
-		DATA_IN_2 => INTERNAL_LOGICAL_OF, 
+	
+	SHIFT_INSTANCE: alu_shift_calc port map(
+		DATA_IN_A => DATA_IN_A, 
+		DATA_IN_B => DATA_IN_B, 
+		OPTIONS => OP_SHIFT_CALC_OPTIONS, 
+		DATA_OUT => DATA_OUT_SHIFT, 
+		OF_OUT => OF_OUT_SHIFT
+	);
+	
+	MX4: multiplexer_16bit_4ways port map(
+		SELECTOR => OPERATION_TYPE, 
+		DATA_IN_1 => DATA_OUT_ARITHMETIC, 
+		DATA_IN_2 => DATA_OUT_LOGICAL_CALC, 
+		DATA_IN_3 => DATA_OUT_SHIFT, 
+		DATA_IN_4 => "0000000000000000",
+		DATA_OUT => DATA_OUT
+	);
+	
+	MX1: multiplexer_1bit_4ways port map(
+		SELECTOR => OPERATION_TYPE, 
+		DATA_IN_1 => OF_OUT_ARITHMETIC, 
+		DATA_IN_2 => OF_OUT_LOGICAL_CALC, 
+		DATA_IN_3 => OF_OUT_SHIFT, 
+		DATA_IN_4 => '0',
 		DATA_OUT => OF_OUT
 	);
-
-	DATA_OUT <= INTERNAL_ADD_SUB_DATA;
 end RTL;
 

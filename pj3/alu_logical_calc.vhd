@@ -5,7 +5,7 @@ entity alu_logical_calc is
 	port(
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
-		OPERATION : in std_logic_vector(1 downto 0);
+		OPTIONS : in std_logic_vector(1 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -26,7 +26,7 @@ end component;
 
 begin
 	MX: multiplexer_16bit_4ways port map(
-		SELECTOR => OPERATION,
+		SELECTOR => OPTIONS,
 		DATA_IN_1 => DATA_IN_A AND DATA_IN_B, 
 		DATA_IN_2 => DATA_IN_A OR DATA_IN_B, 
 		DATA_IN_3 => DATA_IN_A XOR DATA_IN_B, 

@@ -28,8 +28,10 @@ component alu is
 	port(
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
-		SUB_FLAG : in std_logic;
-		LOGICAL_MODE_FLAG : in std_logic;
+		OPERATION_TYPE : in std_logic_vector(1 downto 0); -- 00:ADDSUB, 01: LOGICAL, 10: SHIFT
+		OP_ARITHMETIC_CALC_OPTIONS: in std_logic_vector(1 downto 0); -- LOGICAL_MODE, SUB_FLAG
+		OP_LOGICAL_CALC_OPTIONS: in std_logic_vector(1 downto 0); -- 00: AND, 01: OR, 10: XOR
+		OP_SHIFT_CALC_OPTIONS: in std_logic_vector(1 downto 0); -- LOGICAL_MODE, RIGHT_FLAG
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -134,6 +136,7 @@ signal INTERNAL_NEXT_ZF: std_logic;
 signal MAIN_OP_IS_JP_FLAG : std_logic;
 signal MAIN_OP_IS_LOGICAL_CALC_FLAG: std_logic;
 signal MAIN_OP_IS_CP_FLAG : std_logic;
+signal MAIN_OP_IS_SHIFT_FLAG: std_logic;
 
 -- 演算方法
 signal OP_IS_LD_FLAG : std_logic;
@@ -208,8 +211,10 @@ begin
 	);
 				
 	ALU_INSTANCE : alu port map(
-		SUB_FLAG => OP_IS_SUB_FLAG or MAIN_OP_IS_CP_FLAG, -- 引き算に切り替え
-		LOGICAL_MODE_FLAG => OP_IS_LOGICAL_MODE_FLAG, 
+		OPERATION_TYPE => MAIN_OP_IS_SHIFT_FLAG & MAIN_OP_IS_LOGICAL_CALC_FLAG, 
+		OP_ARITHMETIC_CALC_OPTIONS => OP_IS_LOGICAL_MODE_FLAG & (OP_IS_SUB_FLAG or MAIN_OP_IS_CP_FLAG), 
+		OP_LOGICAL_CALC_OPTIONS => SUB_OP_IN(1 downto 0), 
+		OP_SHIFT_CALC_OPTIONS => OP_IS_LOGICAL_MODE_FLAG & OP_IS_SHIFT_RIGHT_FLAG, 
 		DATA_IN_A => GRA_OR_ZERO, 
 		DATA_IN_B => GRB_OR_RAM, 
 		DATA_OUT => INTERNAL_ALU_DATA, 
@@ -246,6 +251,7 @@ begin
 		MAIN_OP_IS_JP_FLAG => MAIN_OP_IS_JP_FLAG, 
 		MAIN_OP_IS_LOGICAL_CALC_FLAG => MAIN_OP_IS_LOGICAL_CALC_FLAG, 
 		MAIN_OP_IS_CP_FLAG => MAIN_OP_IS_CP_FLAG, 
+		MAIN_OP_IS_SHIFT_FLAG => MAIN_OP_IS_SHIFT_FLAG, 
 		OP_IS_JMI_FLAG => OP_IS_JMI_FLAG, 
 		OP_IS_JNZ_FLAG => OP_IS_JNZ_FLAG, 
 		OP_IS_JZE_FLAG => OP_IS_JZE_FLAG, 

@@ -5,7 +5,7 @@ entity alu_shift_calc is
 	port(
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
-		OPERATION : in std_logic_vector(1 downto 0);
+		OPTIONS : in std_logic_vector(1 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -73,8 +73,8 @@ signal SHIFT2_OF_OUT: std_logic;
 signal SHIFT4_OF_OUT: std_logic;
 
 begin
-	RIGHT_FLAG <= OPERATION(0);
-	LOGICAL_MODE_FLAG <= OPERATION(1);
+	RIGHT_FLAG <= OPTIONS(0);
+	LOGICAL_MODE_FLAG <= OPTIONS(1);
 
 	SHIFT1_INSTANCE: shift_1 port map(
 		DATA_IN => DATA_IN_A, 

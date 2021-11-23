@@ -5,7 +5,7 @@ entity alu_arithmetic_calc is
 	port(
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
-		OPERATION : in std_logic_vector(1 downto 0);
+		OPTIONS : in std_logic_vector(1 downto 0);
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -53,8 +53,8 @@ signal DATA_A_FLAG : std_logic;
 signal DATA_B_FLAG : std_logic;
 
 begin
-	SUB_FLAG <= OPERATION(0);
-	LOGICAL_MODE_FLAG <= OPERATION(1);
+	SUB_FLAG <= OPTIONS(0);
+	LOGICAL_MODE_FLAG <= OPTIONS(1);
 
 	MX_NEGATE_DATAB : multiplexer_16bit_2ways port map( 
 		SELECTOR => SUB_FLAG, 
