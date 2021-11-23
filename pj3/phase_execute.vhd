@@ -100,7 +100,7 @@ component parse_op_as_flag is
 		OP_IS_SUB_FLAG : out std_logic;
 		OP_IS_SHIFT_RIGHT_FLAG : out std_logic;
 		OP_IS_LOGICAL_MODE_FLAG : out std_logic;
-		OP_LENGTH_IS_TWO_FLAG: out std_logic;
+		OP_IS_TWO_WORDS_OPERATION_FLAG: out std_logic;
 		OP_NEEDS_WRITE_GR_FLAG: out std_logic;
 		OP_NEEDS_WRITE_FR_FLAG: out std_logic;
 		OP_NEEDS_WRITE_PR_FLAG: out std_logic
@@ -134,21 +134,27 @@ signal INTERNAL_NEXT_ZF: std_logic;
 signal MAIN_OP_IS_JP_FLAG : std_logic;
 signal MAIN_OP_IS_LOGICAL_CALC_FLAG: std_logic;
 signal MAIN_OP_IS_CP_FLAG : std_logic;
+
+-- 演算方法
+signal OP_IS_LD_FLAG : std_logic;
+signal OP_IS_LAD_FLAG : std_logic;
+signal OP_IS_SUB_FLAG : std_logic;
+signal OP_IS_SHIFT_RIGHT_FLAG: std_logic;
+signal OP_IS_LOGICAL_MODE_FLAG: std_logic;
+
+-- JP判定
 signal OP_IS_JMI_FLAG : std_logic;
 signal OP_IS_JNZ_FLAG : std_logic;
 signal OP_IS_JZE_FLAG : std_logic;
 signal OP_IS_JUMP_FLAG : std_logic;
 signal OP_IS_JPL_FLAG : std_logic;
 signal OP_IS_JOV_FLAG : std_logic;
-signal OP_LENGTH_IS_TWO_FLAG: std_logic;
+
+-- WB処理の準備
+signal OP_IS_TWO_WORDS_OPERATION_FLAG: std_logic;
 signal OP_NEEDS_WRITE_GR_FLAG: std_logic;
 signal OP_NEEDS_WRITE_FR_FLAG: std_logic;
 signal OP_NEEDS_WRITE_PR_FLAG: std_logic;
-signal OP_IS_LD_FLAG : std_logic;
-signal OP_IS_LAD_FLAG : std_logic;
-signal OP_IS_SUB_FLAG : std_logic;
-signal OP_IS_SHIFT_RIGHT_FLAG: std_logic;
-signal OP_IS_LOGICAL_MODE_FLAG: std_logic;
 
 signal USE_JP_FLAG: std_logic;
 
@@ -250,14 +256,15 @@ begin
 		OP_IS_LAD_FLAG => OP_IS_LAD_FLAG, 
 		OP_IS_SUB_FLAG => OP_IS_SUB_FLAG,
 		OP_IS_LOGICAL_MODE_FLAG => OP_IS_LOGICAL_MODE_FLAG, 
-		OP_LENGTH_IS_TWO_FLAG => OP_LENGTH_IS_TWO_FLAG, 
+		OP_IS_SHIFT_RIGHT_FLAG => OP_IS_SHIFT_RIGHT_FLAG, 
+		OP_IS_TWO_WORDS_OPERATION_FLAG => OP_IS_TWO_WORDS_OPERATION_FLAG, 
 		OP_NEEDS_WRITE_GR_FLAG => OP_NEEDS_WRITE_GR_FLAG, 
 		OP_NEEDS_WRITE_FR_FLAG => OP_NEEDS_WRITE_FR_FLAG, 
 		OP_NEEDS_WRITE_PR_FLAG => OP_NEEDS_WRITE_PR_FLAG
 	);
 
 	WORD_COUNT_MUX : multiplexer_16bit_2ways port map(
-		SELECTOR => OP_LENGTH_IS_TWO_FLAG, 
+		SELECTOR => OP_IS_TWO_WORDS_OPERATION_FLAG, 
 		DATA_IN_1 => "0000000000000001", -- 1語命令
 		DATA_IN_2 => "0000000000000010", -- 2語命令
 		DATA_OUT => WORDS_COUNT_TO_ADD
