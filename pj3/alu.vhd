@@ -5,8 +5,10 @@ entity alu is
 	port(
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
+		OPERATION_TYPE : in std_logic_vector(1 downto 0); -- 00:ADDSUB, 01: LOGICAL, 10: SHIFT
 		SUB_FLAG : in std_logic;
 		LOGICAL_MODE_FLAG : in std_logic;
+		SHIFT_RIGHT_FLAG : in std_logic;
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);

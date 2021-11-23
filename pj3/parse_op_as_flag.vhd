@@ -7,6 +7,7 @@ entity parse_op_as_flag is
 		SUB_OP : in std_logic_vector(3 downto 0);			
 		MAIN_OP_IS_LD_ST_LAD_FLAG : out std_logic;
 		MAIN_OP_IS_ADD_SUB_FLAG : out std_logic;
+		MAIN_OP_IS_LOGICAL_CALC_FLAG : out std_logic;
 		MAIN_OP_IS_CP_FLAG : out std_logic;
 		MAIN_OP_IS_JP_FLAG : out std_logic;
 		MAIN_OP_IS_SHIFT_FLAG : out std_logic;
@@ -51,6 +52,8 @@ begin
 	OP_IS_LD_FLAG <= INTERNAL_OP_IS_LD_FLAG;
 	OP_IS_LAD_FLAG <= INTERNAL_OP_IS_LAD_FLAG;
 
+	MAIN_OP_IS_LOGICAL_CALC_FLAG <= not MAIN_OP(3) and not MAIN_OP(2) and MAIN_OP(1) and not MAIN_OP(0);
+	
 	INTERNAL_MAIN_OP_IS_CP_FLAG <= not MAIN_OP(3) and MAIN_OP(2) and not MAIN_OP(1) and not MAIN_OP(0);
 	MAIN_OP_IS_CP_FLAG <= INTERNAL_MAIN_OP_IS_CP_FLAG;
 	INTERNAL_OP_IS_CPL_FLAG <= INTERNAL_MAIN_OP_IS_CP_FLAG AND SUB_OP(0);

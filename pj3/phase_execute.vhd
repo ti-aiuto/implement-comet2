@@ -84,6 +84,7 @@ component parse_op_as_flag is
 		SUB_OP : in std_logic_vector(3 downto 0);			
 		MAIN_OP_IS_LD_ST_LAD_FLAG : out std_logic;
 		MAIN_OP_IS_ADD_SUB_FLAG : out std_logic;
+		MAIN_OP_IS_LOGICAL_CALC_FLAG : out std_logic;
 		MAIN_OP_IS_CP_FLAG : out std_logic;
 		MAIN_OP_IS_JP_FLAG : out std_logic;
 		MAIN_OP_IS_SHIFT_FLAG : out std_logic;
@@ -131,6 +132,8 @@ signal INTERNAL_NEXT_SF: std_logic;
 signal INTERNAL_NEXT_ZF: std_logic;
 
 signal MAIN_OP_IS_JP_FLAG : std_logic;
+signal MAIN_OP_IS_LOGICAL_CALC_FLAG: std_logic;
+signal MAIN_OP_IS_CP_FLAG : std_logic;
 signal OP_IS_JMI_FLAG : std_logic;
 signal OP_IS_JNZ_FLAG : std_logic;
 signal OP_IS_JZE_FLAG : std_logic;
@@ -141,11 +144,10 @@ signal OP_LENGTH_IS_TWO_FLAG: std_logic;
 signal OP_NEEDS_WRITE_GR_FLAG: std_logic;
 signal OP_NEEDS_WRITE_FR_FLAG: std_logic;
 signal OP_NEEDS_WRITE_PR_FLAG: std_logic;
-signal MAIN_OP_IS_CP_FLAG : std_logic;
 signal OP_IS_LD_FLAG : std_logic;
 signal OP_IS_LAD_FLAG : std_logic;
-signal OP_IS_ADD_FLAG : std_logic;
 signal OP_IS_SUB_FLAG : std_logic;
+signal OP_IS_SHIFT_RIGHT_FLAG: std_logic;
 signal OP_IS_LOGICAL_MODE_FLAG: std_logic;
 
 signal USE_JP_FLAG: std_logic;
@@ -236,6 +238,7 @@ begin
 		MAIN_OP => MAIN_OP_IN,
 		SUB_OP => SUB_OP_IN,
 		MAIN_OP_IS_JP_FLAG => MAIN_OP_IS_JP_FLAG, 
+		MAIN_OP_IS_LOGICAL_CALC_FLAG => MAIN_OP_IS_LOGICAL_CALC_FLAG, 
 		MAIN_OP_IS_CP_FLAG => MAIN_OP_IS_CP_FLAG, 
 		OP_IS_JMI_FLAG => OP_IS_JMI_FLAG, 
 		OP_IS_JNZ_FLAG => OP_IS_JNZ_FLAG, 
@@ -245,7 +248,6 @@ begin
 		OP_IS_JOV_FLAG => OP_IS_JOV_FLAG, 
 		OP_IS_LD_FLAG => OP_IS_LD_FLAG, 
 		OP_IS_LAD_FLAG => OP_IS_LAD_FLAG, 
-		OP_IS_ADD_FLAG => OP_IS_ADD_FLAG, 
 		OP_IS_SUB_FLAG => OP_IS_SUB_FLAG,
 		OP_IS_LOGICAL_MODE_FLAG => OP_IS_LOGICAL_MODE_FLAG, 
 		OP_LENGTH_IS_TWO_FLAG => OP_LENGTH_IS_TWO_FLAG, 
