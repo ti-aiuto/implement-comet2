@@ -86,6 +86,7 @@ component parse_op_as_flag is
 		MAIN_OP_IS_ADD_SUB_FLAG : out std_logic;
 		MAIN_OP_IS_CP_FLAG : out std_logic;
 		MAIN_OP_IS_JP_FLAG : out std_logic;
+		MAIN_OP_IS_SHIFT_FLAG : out std_logic;
 		OP_IS_LD_FLAG : out std_logic;
 		OP_IS_LAD_FLAG : out std_logic;
 		OP_IS_JMI_FLAG : out std_logic;
@@ -96,7 +97,8 @@ component parse_op_as_flag is
 		OP_IS_JOV_FLAG : out std_logic;
 		OP_IS_ADD_FLAG : out std_logic;
 		OP_IS_SUB_FLAG : out std_logic;
-		OP_IS_LOGICAL_ADD_SUB_FLAG : out std_logic;
+		OP_IS_SHIFT_RIGHT_FLAG : out std_logic;
+		OP_IS_LOGICAL_CALC_FLAG : out std_logic;
 		OP_LENGTH_IS_TWO_FLAG: out std_logic;
 		OP_NEEDS_WRITE_GR_FLAG: out std_logic;
 		OP_NEEDS_WRITE_FR_FLAG: out std_logic;
@@ -144,7 +146,7 @@ signal OP_IS_LD_FLAG : std_logic;
 signal OP_IS_LAD_FLAG : std_logic;
 signal OP_IS_ADD_FLAG : std_logic;
 signal OP_IS_SUB_FLAG : std_logic;
-signal OP_IS_LOGICAL_ADD_SUB_FLAG: std_logic;
+signal OP_IS_LOGICAL_CALC_FLAG: std_logic;
 
 signal USE_JP_FLAG: std_logic;
 
@@ -199,7 +201,7 @@ begin
 				
 	ALU_INSTANCE : alu port map(
 		SUB_FLAG => OP_IS_SUB_FLAG or MAIN_OP_IS_CP_FLAG, -- 引き算に切り替え
-		LOGICAL_CALC_FLAG => OP_IS_LOGICAL_ADD_SUB_FLAG, 
+		LOGICAL_CALC_FLAG => OP_IS_LOGICAL_CALC_FLAG, 
 		DATA_IN_A => GRA_OR_ZERO, 
 		DATA_IN_B => GRB_OR_RAM, 
 		DATA_OUT => INTERNAL_ALU_DATA, 
@@ -245,7 +247,7 @@ begin
 		OP_IS_LAD_FLAG => OP_IS_LAD_FLAG, 
 		OP_IS_ADD_FLAG => OP_IS_ADD_FLAG, 
 		OP_IS_SUB_FLAG => OP_IS_SUB_FLAG,
-		OP_IS_LOGICAL_ADD_SUB_FLAG => OP_IS_LOGICAL_ADD_SUB_FLAG, 
+		OP_IS_LOGICAL_CALC_FLAG => OP_IS_LOGICAL_CALC_FLAG, 
 		OP_LENGTH_IS_TWO_FLAG => OP_LENGTH_IS_TWO_FLAG, 
 		OP_NEEDS_WRITE_GR_FLAG => OP_NEEDS_WRITE_GR_FLAG, 
 		OP_NEEDS_WRITE_FR_FLAG => OP_NEEDS_WRITE_FR_FLAG, 
