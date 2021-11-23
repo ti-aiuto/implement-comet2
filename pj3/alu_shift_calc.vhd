@@ -19,7 +19,7 @@ component shift_1 is
 		OF_IN: in std_logic;
 		ENABLED_FLAG: in std_logic;
 		RIGHT_FLAG: in std_logic;
-		LOGICAL_CALC_FLAG: in std_logic;
+		LOGICAL_MODE_FLAG: in std_logic;
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -31,7 +31,7 @@ component shift_2 is
 		OF_IN: in std_logic;
 		ENABLED_FLAG: in std_logic;
 		RIGHT_FLAG: in std_logic;
-		LOGICAL_CALC_FLAG: in std_logic;
+		LOGICAL_MODE_FLAG: in std_logic;
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -43,7 +43,7 @@ component shift_4 is
 		OF_IN: in std_logic;
 		ENABLED_FLAG: in std_logic;
 		RIGHT_FLAG: in std_logic;
-		LOGICAL_CALC_FLAG: in std_logic;
+		LOGICAL_MODE_FLAG: in std_logic;
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -55,14 +55,14 @@ component shift_8 is
 		OF_IN: in std_logic;
 		ENABLED_FLAG: in std_logic;
 		RIGHT_FLAG: in std_logic;
-		LOGICAL_CALC_FLAG: in std_logic;
+		LOGICAL_MODE_FLAG: in std_logic;
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
 end component;
 
 signal RIGHT_FLAG : std_logic;
-signal LOGICAL_CALC_FLAG : std_logic;
+signal LOGICAL_MODE_FLAG : std_logic;
 
 signal SHIFT1_DATA_OUT: std_logic_vector(15 downto 0);
 signal SHIFT2_DATA_OUT: std_logic_vector(15 downto 0);
@@ -74,14 +74,14 @@ signal SHIFT4_OF_OUT: std_logic;
 
 begin
 	RIGHT_FLAG <= OPERATION(0);
-	LOGICAL_CALC_FLAG <= OPERATION(1);
+	LOGICAL_MODE_FLAG <= OPERATION(1);
 
 	SHIFT1_INSTANCE: shift_1 port map(
 		DATA_IN => DATA_IN_A, 
 		OF_IN => '0', 
 		ENABLED_FLAG => DATA_IN_B(0), 
 		RIGHT_FLAG => RIGHT_FLAG, 
-		LOGICAL_CALC_FLAG => LOGICAL_CALC_FLAG, 
+		LOGICAL_MODE_FLAG => LOGICAL_MODE_FLAG, 
 		DATA_OUT => SHIFT1_DATA_OUT, 
 		OF_OUT => SHIFT1_OF_OUT
 	);
@@ -91,7 +91,7 @@ begin
 		OF_IN => SHIFT1_OF_OUT, 
 		ENABLED_FLAG => DATA_IN_B(1), 
 		RIGHT_FLAG => RIGHT_FLAG, 
-		LOGICAL_CALC_FLAG => LOGICAL_CALC_FLAG, 
+		LOGICAL_MODE_FLAG => LOGICAL_MODE_FLAG, 
 		DATA_OUT => SHIFT2_DATA_OUT, 
 		OF_OUT => SHIFT2_OF_OUT
 	);
@@ -101,7 +101,7 @@ begin
 		OF_IN => SHIFT2_OF_OUT, 
 		ENABLED_FLAG => DATA_IN_B(2), 
 		RIGHT_FLAG => RIGHT_FLAG, 
-		LOGICAL_CALC_FLAG => LOGICAL_CALC_FLAG, 
+		LOGICAL_MODE_FLAG => LOGICAL_MODE_FLAG, 
 		DATA_OUT => SHIFT4_DATA_OUT, 
 		OF_OUT => SHIFT4_OF_OUT
 	);
@@ -111,7 +111,7 @@ begin
 		OF_IN => SHIFT4_OF_OUT, 
 		ENABLED_FLAG => DATA_IN_B(3), 
 		RIGHT_FLAG => RIGHT_FLAG, 
-		LOGICAL_CALC_FLAG => LOGICAL_CALC_FLAG, 
+		LOGICAL_MODE_FLAG => LOGICAL_MODE_FLAG, 
 		DATA_OUT => DATA_OUT, 
 		OF_OUT => OF_OUT
 	);

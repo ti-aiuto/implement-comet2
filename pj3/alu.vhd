@@ -6,7 +6,7 @@ entity alu is
 		DATA_IN_A: in std_logic_vector(15 downto 0);
 		DATA_IN_B: in std_logic_vector(15 downto 0);
 		SUB_FLAG : in std_logic;
-		LOGICAL_CALC_FLAG : in std_logic;
+		LOGICAL_MODE_FLAG : in std_logic;
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -72,7 +72,7 @@ begin
 		AND (DATA_A_FLAG XOR INTERNAL_ADD_SUB_DATA(15)); -- 正負が変わっているときあふれ
 
 	OF_SELECTOR : multiplexer_1bit_2ways port map(
-		SELECTOR => LOGICAL_CALC_FLAG, 
+		SELECTOR => LOGICAL_MODE_FLAG, 
 		DATA_IN_1 => INTERNAL_ARITHMETIC_OF, 
 		DATA_IN_2 => INTERNAL_LOGICAL_OF, 
 		DATA_OUT => OF_OUT

@@ -41,7 +41,7 @@ component multiplexer_1bit_2ways is
 end component;
 
 signal SUB_FLAG : std_logic;
-signal LOGICAL_CALC_FLAG : std_logic;
+signal LOGICAL_MODE_FLAG : std_logic;
 
 signal DATA_B_OR_NEGATED_DATA_B : std_logic_vector(15 downto 0);
 
@@ -54,7 +54,7 @@ signal DATA_B_FLAG : std_logic;
 
 begin
 	SUB_FLAG <= OPERATION(0);
-	LOGICAL_CALC_FLAG <= OPERATION(1);
+	LOGICAL_MODE_FLAG <= OPERATION(1);
 
 	MX_NEGATE_DATAB : multiplexer_16bit_2ways port map( 
 		SELECTOR => SUB_FLAG, 
@@ -77,7 +77,7 @@ begin
 		AND (DATA_A_FLAG XOR INTERNAL_ADD_SUB_DATA(15)); -- 正負が変わっているときあふれ
 
 	OF_SELECTOR : multiplexer_1bit_2ways port map(
-		SELECTOR => LOGICAL_CALC_FLAG, 
+		SELECTOR => LOGICAL_MODE_FLAG, 
 		DATA_IN_1 => INTERNAL_ARITHMETIC_OF, 
 		DATA_IN_2 => INTERNAL_LOGICAL_OF, 
 		DATA_OUT => OF_OUT

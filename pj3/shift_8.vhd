@@ -7,7 +7,7 @@ entity shift_8 is
 		OF_IN: in std_logic;
 		ENABLED_FLAG: in std_logic;
 		RIGHT_FLAG: in std_logic;
-		LOGICAL_CALC_FLAG: in std_logic;
+		LOGICAL_MODE_FLAG: in std_logic;
 		DATA_OUT : out std_logic_vector(15 downto 0);
 		OF_OUT : out std_logic
 	);
@@ -60,7 +60,7 @@ signal INTERNAL_OF: std_logic;
 
 begin
 	MX_DATA: multiplexer_16bit_4ways port map(
-		SELECTOR => LOGICAL_CALC_FLAG & RIGHT_FLAG, 
+		SELECTOR => LOGICAL_MODE_FLAG & RIGHT_FLAG, 
 		DATA_IN_1 => DATA_IN(15) & DATA_IN(6 downto 0) & "00000000", -- 左算術シフト
 		DATA_IN_2 => DATA_IN(15) 
 			& DATA_IN(15) & DATA_IN(15) & DATA_IN(15) & DATA_IN(15) 
@@ -71,7 +71,7 @@ begin
 	);
 	
 	MX_OF: multiplexer_1bit_4ways port map(
-		SELECTOR => LOGICAL_CALC_FLAG & RIGHT_FLAG, 
+		SELECTOR => LOGICAL_MODE_FLAG & RIGHT_FLAG, 
 		DATA_IN_1 => DATA_IN(7), -- 左算術シフト
 		DATA_IN_2 => DATA_IN(7), -- 右算術シフト
 		DATA_IN_3 => DATA_IN(8), --左論理シフト
